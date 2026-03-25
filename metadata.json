@@ -1,0 +1,5 @@
+{
+  "name": "Numisca",
+  "description": "A digital ecosystem for collectors to buy, swap, and manage collectibles with community features and safe trading.",
+  "requestFramePermissions": ["camera"]
+}

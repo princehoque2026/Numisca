@@ -1,0 +1,110 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Collector or Admin profile",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "location": { "type": "string" },
+        "bio": { "type": "string" },
+        "role": { "type": "string", "enum": ["admin", "collector"] },
+        "wishlist": { "type": "array", "items": { "type": "string" } },
+        "setupCompleted": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "role"]
+    },
+    "Collectible": {
+      "title": "Collectible",
+      "description": "Item available in the admin shop",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "type": { "type": "string", "enum": ["coin", "banknote", "stamp", "keychain", "other"] },
+        "country": { "type": "string" },
+        "year": { "type": "number" },
+        "quantity": { "type": "number" },
+        "price": { "type": "number" },
+        "imageUrl": { "type": "string" },
+        "rarity": { "type": "string", "enum": ["common", "uncommon", "rare", "legendary"] },
+        "status": { "type": "string", "enum": ["available", "sold"] }
+      },
+      "required": ["name", "type", "country", "price"]
+    },
+    "InventoryItem": {
+      "title": "InventoryItem",
+      "description": "An item in a user's personal collection",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "ownerUid": { "type": "string" },
+        "collectibleId": { "type": "string" },
+        "name": { "type": "string" },
+        "type": { "type": "string" },
+        "country": { "type": "string" },
+        "year": { "type": "number" },
+        "rarity": { "type": "string" },
+        "quantity": { "type": "number" },
+        "source": { "type": "string", "enum": ["purchase", "swap", "manual"] },
+        "addedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["ownerUid", "name", "type", "country"]
+    },
+    "Swap": {
+      "title": "Swap",
+      "description": "A peer-to-peer item exchange",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "initiatorUid": { "type": "string" },
+        "receiverUid": { "type": "string" },
+        "initiatorItemIds": { "type": "array", "items": { "type": "string" } },
+        "receiverItemIds": { "type": "array", "items": { "type": "string" } },
+        "status": { "type": "string", "enum": ["pending", "escrow", "completed", "cancelled"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["initiatorUid", "receiverUid", "status"]
+    },
+    "Chat": {
+      "title": "Chat",
+      "description": "A group or direct conversation",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "type": "string", "enum": ["group", "direct"] },
+        "name": { "type": "string" },
+        "participants": { "type": "array", "items": { "type": "string" } },
+        "lastMessage": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["type", "participants"]
+    },
+    "Message": {
+      "title": "Message",
+      "description": "A single message in a chat",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "chatId": { "type": "string" },
+        "senderUid": { "type": "string" },
+        "senderName": { "type": "string" },
+        "text": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["chatId", "senderUid", "text"]
+    }
+  },
+  "firestore": {
+    "/users/{uid}": { "schema": "User", "description": "User profiles" },
+    "/collectibles/{id}": { "schema": "Collectible", "description": "Shop items" },
+    "/inventory/{id}": { "schema": "InventoryItem", "description": "User collections" },
+    "/swaps/{id}": { "schema": "Swap", "description": "Swap requests" },
+    "/chats/{id}": { "schema": "Chat", "description": "Conversations" },
+    "/chats/{chatId}/messages/{id}": { "schema": "Message", "description": "Chat messages" }
+  }
+}
