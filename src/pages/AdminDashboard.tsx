@@ -119,97 +119,97 @@ export const AdminDashboard: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-6 pb-20">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex justify-between items-end"
+        className="flex flex-col items-start gap-4"
       >
         <div>
-          <h1 className="text-5xl font-display font-bold tracking-tight">Admin Console</h1>
-          <p className="text-gray-500 mt-2 font-sans">Global platform metrics and management.</p>
+          <h1 className="text-3xl font-display font-bold tracking-tight">Admin Console</h1>
+          <p className="text-xs text-gray-500 mt-1 font-sans">Platform management.</p>
         </div>
         <button 
           onClick={() => setIsAddingItem(true)}
-          className="btn-pill flex items-center gap-2"
+          className="btn-pill flex items-center gap-2 py-2 px-4 text-xs"
         >
-          <Plus size={18} /> Add Shop Item
+          <Plus size={14} /> Add Shop Item
         </button>
       </motion.div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 gap-3">
         {[
-          { label: 'Total Users', value: stats.users, icon: Users },
-          { label: 'Shop Items', value: stats.items, icon: ShoppingBag },
-          { label: 'Active Swaps', value: stats.swaps, icon: Repeat },
-          { label: 'Total Value', value: `$${stats.revenue}`, icon: ShieldCheck },
+          { label: 'Users', value: stats.users, icon: Users },
+          { label: 'Items', value: stats.items, icon: ShoppingBag },
+          { label: 'Swaps', value: stats.swaps, icon: Repeat },
+          { label: 'Value', value: `$${stats.revenue}`, icon: ShieldCheck },
         ].map((stat, i) => (
           <motion.div 
             key={i} 
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: i * 0.1 }}
-            className="stat-card p-8 bg-white group hover:bg-black transition-all duration-500"
+            className="stat-card p-4 bg-white group hover:bg-black transition-all duration-500"
           >
-            <div className="p-3 bg-gray-50 rounded-2xl w-fit group-hover:bg-white/10 transition-colors">
-              <stat.icon size={24} className="group-hover:text-white transition-colors" />
+            <div className="p-2 bg-gray-50 rounded-xl w-fit group-hover:bg-white/10 transition-colors">
+              <stat.icon size={16} className="group-hover:text-white transition-colors" />
             </div>
-            <div className="mt-6">
-              <h3 className="text-[10px] uppercase tracking-[0.2em] font-bold text-gray-400 group-hover:text-gray-500 transition-colors">{stat.label}</h3>
-              <p className="text-4xl font-display font-bold mt-1 group-hover:text-white transition-colors">{stat.value}</p>
+            <div className="mt-3">
+              <h3 className="text-[8px] uppercase tracking-widest font-bold text-gray-400 group-hover:text-gray-500 transition-colors">{stat.label}</h3>
+              <p className="text-xl font-display font-bold mt-0.5 group-hover:text-white transition-colors">{stat.value}</p>
             </div>
           </motion.div>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+      <div className="space-y-6">
         {/* Verification Requests */}
         <motion.div 
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="bg-white card-curved p-10 shadow-sm"
+          className="bg-white card-curved p-6 shadow-sm"
         >
-          <div className="flex justify-between items-center mb-10">
-            <h3 className="text-[10px] uppercase tracking-[0.2em] font-bold text-gray-400">Verification Requests</h3>
-            <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-[8px] font-bold uppercase tracking-widest">
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="text-[8px] uppercase tracking-widest font-bold text-gray-400">Verification Requests</h3>
+            <span className="px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full text-[8px] font-bold uppercase tracking-widest">
               {pendingVerifications.length} Pending
             </span>
           </div>
-          <div className="space-y-6">
+          <div className="space-y-4">
             {pendingVerifications.length > 0 ? (
               pendingVerifications.map((user) => (
-                <div key={user.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-3xl group hover:bg-black transition-all duration-300">
-                  <div className="flex items-center gap-4">
+                <div key={user.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-2xl group hover:bg-black transition-all duration-300">
+                  <div className="flex items-center gap-3">
                     <img 
                       src={user.photoURL || `https://ui-avatars.com/api/?name=${user.name}`} 
                       alt={user.name}
-                      className="w-12 h-12 rounded-2xl object-cover border-2 border-white"
+                      className="w-10 h-10 rounded-xl object-cover border border-white"
                       referrerPolicy="no-referrer"
                     />
-                    <div>
-                      <h4 className="text-sm font-bold group-hover:text-white transition-colors">{user.name}</h4>
-                      <p className="text-[10px] text-gray-400 uppercase tracking-widest group-hover:text-gray-500 transition-colors">{user.location || 'Global'}</p>
+                    <div className="min-w-0">
+                      <h4 className="text-xs font-bold group-hover:text-white transition-colors truncate max-w-[100px]">{user.name}</h4>
+                      <p className="text-[8px] text-gray-400 uppercase tracking-widest group-hover:text-gray-500 transition-colors truncate">{user.location || 'Global'}</p>
                     </div>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-1">
                     <button 
                       onClick={() => handleVerification(user.id, 'verified')}
-                      className="p-2 bg-white text-green-500 rounded-xl hover:bg-green-500 hover:text-white transition-all shadow-sm"
+                      className="p-2 bg-white text-green-500 rounded-lg hover:bg-green-500 hover:text-white transition-all shadow-sm"
                     >
-                      <Check size={16} />
+                      <Check size={14} />
                     </button>
                     <button 
                       onClick={() => handleVerification(user.id, 'rejected')}
-                      className="p-2 bg-white text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-all shadow-sm"
+                      className="p-2 bg-white text-red-500 rounded-lg hover:bg-red-500 hover:text-white transition-all shadow-sm"
                     >
-                      <X size={16} />
+                      <X size={14} />
                     </button>
                   </div>
                 </div>
               ))
             ) : (
-              <div className="py-12 text-center text-gray-400 text-[10px] uppercase font-bold tracking-widest">
+              <div className="py-8 text-center text-gray-400 text-[8px] uppercase font-bold tracking-widest">
                 No pending requests
               </div>
             )}
@@ -220,23 +220,23 @@ export const AdminDashboard: React.FC = () => {
         <motion.div 
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="bg-white card-curved p-10 shadow-sm"
+          className="bg-white card-curved p-6 shadow-sm"
         >
-          <h3 className="text-[10px] uppercase tracking-[0.2em] font-bold text-gray-400 mb-10">Recent Collectors</h3>
-          <div className="space-y-8">
+          <h3 className="text-[8px] uppercase tracking-widest font-bold text-gray-400 mb-6">Recent Collectors</h3>
+          <div className="space-y-4">
             {recentUsers.map((user) => (
               <div key={user.id} className="flex items-center justify-between group">
-                <div className="flex items-center gap-5">
-                  <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-sm font-bold group-hover:bg-black group-hover:text-white transition-all duration-300">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center text-xs font-bold group-hover:bg-black group-hover:text-white transition-all duration-300">
                     {user.name?.[0]}
                   </div>
-                  <div>
-                    <h4 className="text-sm font-bold group-hover:translate-x-1 transition-transform">{user.name}</h4>
-                    <p className="text-[10px] text-gray-400 uppercase tracking-widest mt-0.5">{user.email}</p>
+                  <div className="min-w-0">
+                    <h4 className="text-xs font-bold group-hover:translate-x-1 transition-transform truncate max-w-[120px]">{user.name}</h4>
+                    <p className="text-[8px] text-gray-400 uppercase tracking-widest mt-0.5 truncate max-w-[120px]">{user.email}</p>
                   </div>
                 </div>
-                <span className={`badge ${
-                  user.role === 'admin' ? 'bg-black text-white border-black' : 'bg-gray-50 text-gray-500 border-gray-100'
+                <span className={`px-2 py-0.5 rounded-full text-[8px] font-bold uppercase tracking-widest ${
+                  user.role === 'admin' ? 'bg-black text-white' : 'bg-gray-50 text-gray-500'
                 }`}>
                   {user.role}
                 </span>
@@ -250,58 +250,58 @@ export const AdminDashboard: React.FC = () => {
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="p-8 bg-gray-50 rounded-[2rem] flex items-center gap-6 border border-gray-100"
+        className="p-5 bg-gray-50 rounded-3xl flex items-center gap-4 border border-gray-100"
       >
-        <div className="p-4 bg-white rounded-2xl shadow-sm">
-          <AlertTriangle className="text-black" size={24} />
+        <div className="p-3 bg-white rounded-xl shadow-sm">
+          <AlertTriangle className="text-black" size={18} />
         </div>
         <div>
-          <h4 className="text-sm font-bold uppercase tracking-widest">System Integrity Check</h4>
-          <p className="text-xs text-gray-500 mt-1 font-sans">All escrow services are operational. 2 swaps pending admin review.</p>
+          <h4 className="text-[10px] font-bold uppercase tracking-widest">System Integrity</h4>
+          <p className="text-[8px] text-gray-500 mt-0.5 font-sans">All services operational. 2 pending review.</p>
         </div>
       </motion.div>
 
       {/* Add Item Modal */}
       {isAddingItem && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-6">
+        <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/60 backdrop-blur-sm">
           <motion.div 
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            className="bg-white p-10 max-w-2xl w-full rounded-[3rem] shadow-2xl relative max-h-[90vh] overflow-y-auto"
+            initial={{ opacity: 0, y: "100%" }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white p-6 w-full rounded-t-[2rem] shadow-2xl max-h-[90vh] overflow-y-auto"
           >
-            <div className="flex justify-between items-center mb-10">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-black text-white rounded-2xl">
-                  <Package size={24} />
+            <div className="flex justify-between items-center mb-6">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-black text-white rounded-xl">
+                  <Package size={20} />
                 </div>
-                <h2 className="text-3xl font-display font-bold">Add Shop Item</h2>
+                <h2 className="text-2xl font-display font-bold">Add Shop Item</h2>
               </div>
               <button 
                 onClick={() => setIsAddingItem(false)}
                 className="p-2 hover:bg-gray-100 rounded-full transition-colors"
               >
-                <X size={24} />
+                <X size={20} />
               </button>
             </div>
 
-            <form onSubmit={handleAddItem} className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="space-y-6">
-                <div className="space-y-2">
-                  <label className="text-[10px] uppercase font-bold tracking-widest text-gray-400 ml-1">Item Name</label>
+            <form onSubmit={handleAddItem} className="space-y-6">
+              <div className="space-y-4">
+                <div className="space-y-1">
+                  <label className="text-[8px] uppercase font-bold tracking-widest text-gray-400 ml-1">Item Name</label>
                   <input 
                     required
                     type="text" 
-                    className="input-field" 
+                    className="input-field py-3 text-sm" 
                     value={newItem.name}
                     onChange={(e) => setNewItem({...newItem, name: e.target.value})}
                     placeholder="e.g. 1921 Morgan Silver Dollar"
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-[10px] uppercase font-bold tracking-widest text-gray-400 ml-1">Type</label>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-[8px] uppercase font-bold tracking-widest text-gray-400 ml-1">Type</label>
                     <select 
-                      className="input-field"
+                      className="input-field py-3 text-sm"
                       value={newItem.type}
                       onChange={(e) => setNewItem({...newItem, type: e.target.value})}
                     >
@@ -311,43 +311,43 @@ export const AdminDashboard: React.FC = () => {
                       <option value="other">Other</option>
                     </select>
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-[10px] uppercase font-bold tracking-widest text-gray-400 ml-1">Price ($)</label>
+                  <div className="space-y-1">
+                    <label className="text-[8px] uppercase font-bold tracking-widest text-gray-400 ml-1">Price ($)</label>
                     <input 
                       required
                       type="number" 
-                      className="input-field" 
+                      className="input-field py-3 text-sm" 
                       value={newItem.price}
                       onChange={(e) => setNewItem({...newItem, price: e.target.value})}
                     />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-[10px] uppercase font-bold tracking-widest text-gray-400 ml-1">Country</label>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-[8px] uppercase font-bold tracking-widest text-gray-400 ml-1">Country</label>
                     <input 
                       required
                       type="text" 
-                      className="input-field" 
+                      className="input-field py-3 text-sm" 
                       value={newItem.country}
                       onChange={(e) => setNewItem({...newItem, country: e.target.value})}
                     />
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-[10px] uppercase font-bold tracking-widest text-gray-400 ml-1">Year</label>
+                  <div className="space-y-1">
+                    <label className="text-[8px] uppercase font-bold tracking-widest text-gray-400 ml-1">Year</label>
                     <input 
                       required
                       type="text" 
-                      className="input-field" 
+                      className="input-field py-3 text-sm" 
                       value={newItem.year}
                       onChange={(e) => setNewItem({...newItem, year: e.target.value})}
                     />
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] uppercase font-bold tracking-widest text-gray-400 ml-1">Rarity</label>
+                <div className="space-y-1">
+                  <label className="text-[8px] uppercase font-bold tracking-widest text-gray-400 ml-1">Rarity</label>
                   <select 
-                    className="input-field"
+                    className="input-field py-3 text-sm"
                     value={newItem.rarity}
                     onChange={(e) => setNewItem({...newItem, rarity: e.target.value})}
                   >
@@ -359,24 +359,24 @@ export const AdminDashboard: React.FC = () => {
                 </div>
               </div>
 
-              <div className="space-y-6">
-                <div className="space-y-2">
-                  <label className="text-[10px] uppercase font-bold tracking-widest text-gray-400 ml-1">Item Image</label>
-                  <div className="aspect-square bg-gray-50 rounded-[2rem] border-2 border-dashed border-gray-200 flex flex-col items-center justify-center relative overflow-hidden group">
+              <div className="space-y-4">
+                <div className="space-y-1">
+                  <label className="text-[8px] uppercase font-bold tracking-widest text-gray-400 ml-1">Item Image</label>
+                  <div className="aspect-square bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center relative overflow-hidden group">
                     {newItem.imageUrl ? (
                       <>
                         <img src={newItem.imageUrl} alt="Preview" className="w-full h-full object-cover" />
-                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                          <label className="cursor-pointer p-4 bg-white text-black rounded-full shadow-xl hover:scale-110 transition-transform">
-                            <Upload size={24} />
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                          <label className="cursor-pointer p-3 bg-white text-black rounded-full shadow-xl">
+                            <Upload size={20} />
                             <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
                           </label>
                         </div>
                       </>
                     ) : (
-                      <label className="cursor-pointer flex flex-col items-center gap-3 text-gray-400 hover:text-black transition-colors">
-                        <Upload size={48} />
-                        <span className="text-[10px] uppercase font-bold tracking-widest">Upload Photo</span>
+                      <label className="cursor-pointer flex flex-col items-center gap-2 text-gray-400">
+                        <Upload size={32} />
+                        <span className="text-[8px] uppercase font-bold tracking-widest">Upload Photo</span>
                         <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
                       </label>
                     )}
@@ -384,7 +384,7 @@ export const AdminDashboard: React.FC = () => {
                 </div>
                 <button 
                   type="submit" 
-                  className="btn-pill w-full py-6 text-lg"
+                  className="btn-pill w-full py-4 text-sm"
                 >
                   Create Listing
                 </button>

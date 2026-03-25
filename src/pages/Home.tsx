@@ -32,9 +32,9 @@ export const Home: React.FC<{ onStart: () => void }> = ({ onStart }) => {
   }, []);
 
   return (
-    <div className="space-y-24">
+    <div className="space-y-16 pb-10">
       {/* Hero Section */}
-      <section className="relative h-[80vh] flex flex-col items-center justify-center text-center overflow-hidden rounded-[3rem] bg-gray-50 border border-black/5">
+      <section className="relative h-[65vh] flex flex-col items-center justify-center text-center overflow-hidden rounded-[2.5rem] bg-gray-50 border border-black/5">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -50,12 +50,12 @@ export const Home: React.FC<{ onStart: () => void }> = ({ onStart }) => {
           />
         </motion.div>
 
-        <div className="relative z-20 max-w-4xl px-6">
+        <div className="relative z-20 px-6">
           <motion.h1 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="text-6xl md:text-8xl font-display font-bold leading-tight tracking-tighter"
+            className="text-4xl font-display font-bold leading-tight tracking-tighter"
           >
             The Art of <br /> <span className="text-gray-400">Collecting</span>
           </motion.h1>
@@ -63,122 +63,118 @@ export const Home: React.FC<{ onStart: () => void }> = ({ onStart }) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="mt-6 text-xl text-gray-500 font-medium max-w-2xl mx-auto"
+            className="mt-4 text-sm text-gray-500 font-medium max-w-xs mx-auto"
           >
-            Numisca is a digital sanctuary for numismatists and philatelists. 
+            Numisca is a digital sanctuary for numismatists. 
             Discover rare treasures, swap with peers, and curate your legacy.
           </motion.p>
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
-            className="mt-12 flex flex-col md:flex-row gap-4 justify-center"
+            className="mt-8 flex flex-col gap-3 items-center"
           >
             {user ? (
-              <button onClick={onStart} className="btn-pill flex items-center gap-2 group">
-                Enter Dashboard <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+              <button onClick={onStart} className="btn-pill flex items-center gap-2 group py-3 px-8 text-sm">
+                Enter Dashboard <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
               </button>
             ) : (
-              <button onClick={signInWithGoogle} className="btn-pill flex items-center gap-2">
-                Start Your Collection <Star size={16} />
+              <button onClick={signInWithGoogle} className="btn-pill flex items-center gap-2 py-3 px-8 text-sm">
+                Start Your Collection <Star size={14} />
               </button>
             )}
-            <button className="btn-pill-outline">Explore Shop</button>
+            <button className="btn-pill-outline py-3 px-8 text-sm">Explore Shop</button>
           </motion.div>
         </div>
       </section>
 
       {/* Features Grid */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <section className="grid grid-cols-1 gap-4">
         <motion.div 
-          whileHover={{ y: -10 }}
-          className="card-curved p-10 space-y-6"
+          className="card-curved p-6 space-y-4"
         >
-          <div className="w-16 h-16 bg-black text-white rounded-2xl flex items-center justify-center shadow-xl">
-            <Shield size={28} />
+          <div className="w-12 h-12 bg-black text-white rounded-xl flex items-center justify-center shadow-lg">
+            <Shield size={20} />
           </div>
-          <h3 className="text-2xl font-display">Secure Escrow</h3>
-          <p className="text-gray-500 font-medium leading-relaxed">
+          <h3 className="text-xl font-display font-bold">Secure Escrow</h3>
+          <p className="text-xs text-gray-500 font-medium leading-relaxed">
             Our proprietary swap system ensures both parties receive their items before releasing the trade.
           </p>
         </motion.div>
         <motion.div 
-          whileHover={{ y: -10 }}
-          className="card-curved p-10 space-y-6"
+          className="card-curved p-6 space-y-4"
         >
-          <div className="w-16 h-16 bg-black text-white rounded-2xl flex items-center justify-center shadow-xl">
-            <Globe size={28} />
+          <div className="w-12 h-12 bg-black text-white rounded-xl flex items-center justify-center shadow-lg">
+            <Globe size={20} />
           </div>
-          <h3 className="text-2xl font-display">Global Network</h3>
-          <p className="text-gray-500 font-medium leading-relaxed">
+          <h3 className="text-xl font-display font-bold">Global Network</h3>
+          <p className="text-xs text-gray-500 font-medium leading-relaxed">
             Connect with collectors from over 150 countries. Expand your horizons across borders.
           </p>
         </motion.div>
         <motion.div 
-          whileHover={{ y: -10 }}
-          className="card-curved p-10 space-y-6"
+          className="card-curved p-6 space-y-4"
         >
-          <div className="w-16 h-16 bg-black text-white rounded-2xl flex items-center justify-center shadow-xl">
-            <Zap size={28} />
+          <div className="w-12 h-12 bg-black text-white rounded-xl flex items-center justify-center shadow-lg">
+            <Zap size={20} />
           </div>
-          <h3 className="text-2xl font-display">Instant Valuation</h3>
-          <p className="text-gray-500 font-medium leading-relaxed">
+          <h3 className="text-xl font-display font-bold">Instant Valuation</h3>
+          <p className="text-xs text-gray-500 font-medium leading-relaxed">
             Get real-time market data and rarity scores for every item in your personal inventory.
           </p>
         </motion.div>
       </section>
 
       {/* Featured Items */}
-      <section className="space-y-12">
-        <div className="flex justify-between items-end">
+      <section className="space-y-8">
+        <div className="flex justify-between items-end px-2">
           <div>
-            <h2 className="text-4xl font-display">Curated Selection</h2>
-            <p className="text-gray-500 mt-2 font-medium">Hand-picked rarities from our master curators.</p>
+            <h2 className="text-2xl font-display font-bold">Curated Selection</h2>
+            <p className="text-[10px] text-gray-500 mt-1 font-medium">Hand-picked rarities from our curators.</p>
           </div>
           <button 
             onClick={() => onStart()}
-            className="text-xs uppercase tracking-widest font-bold border-b-2 border-black pb-1 hover:text-gray-500 transition-colors"
+            className="text-[10px] uppercase tracking-widest font-bold border-b border-black pb-0.5 hover:text-gray-500 transition-colors"
           >
             View All
           </button>
         </div>
         
         {featuredItems.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 gap-6">
             {featuredItems.map((item, i) => (
               <motion.div 
                 key={item.id}
-                whileHover={{ y: -10 }}
                 className="group cursor-pointer"
                 onClick={() => onStart()}
               >
-                <div className="aspect-[3/4] bg-gray-100 overflow-hidden relative rounded-[2rem] border border-black/5 shadow-sm group-hover:shadow-2xl transition-all duration-500">
+                <div className="aspect-[4/3] bg-gray-100 overflow-hidden relative rounded-[2rem] border border-black/5 shadow-sm">
                   <img 
-                    src={item.imageUrl || `https://picsum.photos/seed/${item.id}/600/800`} 
+                    src={item.imageUrl || `https://picsum.photos/seed/${item.id}/800/600`} 
                     alt={item.name} 
-                    className="w-full h-full object-cover transition-all duration-700 scale-110 group-hover:scale-100"
+                    className="w-full h-full object-cover"
                     referrerPolicy="no-referrer"
                   />
-                  <div className={`absolute top-6 left-6 px-3 py-1 text-[8px] uppercase tracking-widest font-bold rounded-full ${
+                  <div className={`absolute top-4 left-4 px-2 py-0.5 text-[7px] uppercase tracking-widest font-bold rounded-full ${
                     item.rarity === 'legendary' ? 'bg-yellow-400 text-black' : 'bg-black text-white'
                   }`}>
                     {item.rarity}
                   </div>
                 </div>
-                <div className="mt-6 flex justify-between items-start px-2">
-                  <div>
-                    <h4 className="font-display text-lg">{item.name}</h4>
-                    <p className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">{item.country} • {item.year}</p>
+                <div className="mt-4 flex justify-between items-start px-2">
+                  <div className="min-w-0">
+                    <h4 className="font-display text-base font-bold truncate">{item.name}</h4>
+                    <p className="text-[8px] text-gray-400 uppercase tracking-widest font-bold">{item.country} • {item.year}</p>
                   </div>
-                  <span className="font-bold text-lg">${item.price}</span>
+                  <span className="font-bold text-base">৳{item.price}</span>
                 </div>
               </motion.div>
             ))}
           </div>
         ) : (
-          <div className="py-24 text-center card-curved bg-gray-50 border-dashed border-2 border-gray-200">
-            <ShoppingBag size={48} className="mx-auto text-gray-200 mb-4" />
-            <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">The Archives are currently empty</p>
+          <div className="py-16 text-center card-curved bg-gray-50 border-dashed border-2 border-gray-200">
+            <ShoppingBag size={32} className="mx-auto text-gray-200 mb-3" />
+            <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px]">The Archives are currently empty</p>
           </div>
         )}
       </section>

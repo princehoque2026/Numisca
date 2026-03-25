@@ -2,7 +2,7 @@ import React from 'react';
 import { collection, query, where, onSnapshot, addDoc, serverTimestamp, deleteDoc, doc } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '../firebase';
 import { useAuth } from '../contexts/AuthContext';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { Plus, Map as MapIcon, PieChart as ChartIcon, Search, Globe, Filter, Trash2, Upload, X } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis } from 'recharts';
 
@@ -18,6 +18,7 @@ interface InventoryItem {
   source: string;
   imageUrl?: string;
   addedAt: any;
+  description?: string;
 }
 
 export const Inventory: React.FC = () => {
@@ -25,7 +26,12 @@ export const Inventory: React.FC = () => {
   const [items, setItems] = React.useState<InventoryItem[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [isAdding, setIsAdding] = React.useState(false);
+  const [selectedItem, setSelectedItem] = React.useState<InventoryItem | null>(null);
   const [view, setView] = React.useState<'grid' | 'stats'>('grid');
+  const [search, setSearch] = React.useState('');
+  const [sortBy, setSortBy] = React.useState<'name' | 'date' | 'rarity'>('date');
+  const [filterType, setFilterType] = React.useState('all');
+  const [filterRarity, setFilterRarity] = React.useState('all');
 
   // Form state
   const [newItem, setNewItem] = React.useState<Partial<InventoryItem>>({
@@ -36,7 +42,8 @@ export const Inventory: React.FC = () => {
     quantity: 1,
     rarity: 'common',
     source: 'manual',
-    imageUrl: ''
+    imageUrl: '',
+    description: ''
   });
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -83,7 +90,8 @@ export const Inventory: React.FC = () => {
         quantity: 1,
         rarity: 'common',
         source: 'manual',
-        imageUrl: ''
+        imageUrl: '',
+        description: ''
       });
     } catch (error) {
       handleFirestoreError(error, OperationType.CREATE, 'inventory');
@@ -98,6 +106,32 @@ export const Inventory: React.FC = () => {
       handleFirestoreError(error, OperationType.DELETE, `inventory/${id}`);
     }
   };
+
+  const filteredAndSortedItems = React.useMemo(() => {
+    let result = items.filter(item => {
+      const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase()) || 
+                           item.country.toLowerCase().includes(search.toLowerCase());
+      const matchesType = filterType === 'all' || item.type === filterType;
+      const matchesRarity = filterRarity === 'all' || item.rarity === filterRarity;
+      return matchesSearch && matchesType && matchesRarity;
+    });
+
+    result.sort((a, b) => {
+      if (sortBy === 'name') return a.name.localeCompare(b.name);
+      if (sortBy === 'date') {
+        const dateA = a.addedAt?.seconds || 0;
+        const dateB = b.addedAt?.seconds || 0;
+        return dateB - dateA;
+      }
+      if (sortBy === 'rarity') {
+        const rarityOrder = { legendary: 4, rare: 3, uncommon: 2, common: 1 };
+        return (rarityOrder[b.rarity as keyof typeof rarityOrder] || 0) - (rarityOrder[a.rarity as keyof typeof rarityOrder] || 0);
+      }
+      return 0;
+    });
+
+    return result;
+  }, [items, search, filterType, filterRarity, sortBy]);
 
   // Stats Data
   const typeData = React.useMemo(() => {
@@ -123,49 +157,101 @@ export const Inventory: React.FC = () => {
 
   return (
     <div className="space-y-12">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+      <div className="flex flex-col gap-4">
         <div>
-          <h1 className="text-5xl font-display font-bold">My Collection</h1>
-          <p className="text-gray-500 mt-2 font-medium">Manage and visualize your personal inventory.</p>
+          <h1 className="text-3xl font-display font-bold">My Collection</h1>
+          <p className="text-xs text-gray-500 mt-1 font-medium">Manage and visualize your personal inventory.</p>
         </div>
         
-        <div className="flex items-center gap-4">
-          <div className="flex border border-black p-1 rounded-xl overflow-hidden">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex border border-black p-1 rounded-xl overflow-hidden bg-white">
             <button 
               onClick={() => setView('grid')}
               className={`p-2 transition-all ${view === 'grid' ? 'bg-black text-white' : 'hover:bg-gray-100'}`}
             >
-              <Filter size={16} />
+              <Filter size={14} />
             </button>
             <button 
               onClick={() => setView('stats')}
               className={`p-2 transition-all ${view === 'stats' ? 'bg-black text-white' : 'hover:bg-gray-100'}`}
             >
-              <ChartIcon size={16} />
+              <ChartIcon size={14} />
             </button>
           </div>
           <button 
             onClick={() => setIsAdding(true)}
-            className="btn-pill flex items-center gap-2"
+            className="btn-pill flex items-center gap-2 text-xs py-2.5"
           >
-            <Plus size={16} /> Add Manually
+            <Plus size={14} /> Add Manually
           </button>
         </div>
       </div>
 
+      {view === 'grid' && (
+        <div className="flex flex-col gap-3 bg-gray-50 p-4 rounded-[1.5rem] border border-black/5">
+          <div className="relative w-full">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
+            <input 
+              type="text" 
+              placeholder="Search..." 
+              className="input-field pl-10 bg-white text-sm py-2.5"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+          
+          <div className="grid grid-cols-2 gap-2 w-full">
+            <select 
+              className="input-field py-2 text-[10px] bg-white"
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value)}
+            >
+              <option value="all">All Types</option>
+              <option value="coin">Coins</option>
+              <option value="banknote">Banknotes</option>
+              <option value="stamp">Stamps</option>
+              <option value="keychain">Keychains</option>
+              <option value="other">Other</option>
+            </select>
+
+            <select 
+              className="input-field py-2 text-[10px] bg-white"
+              value={filterRarity}
+              onChange={(e) => setFilterRarity(e.target.value)}
+            >
+              <option value="all">All Rarities</option>
+              <option value="common">Common</option>
+              <option value="uncommon">Uncommon</option>
+              <option value="rare">Rare</option>
+              <option value="legendary">Legendary</option>
+            </select>
+
+            <select 
+              className="input-field py-2 text-[10px] bg-white col-span-2"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as any)}
+            >
+              <option value="date">Newest Added</option>
+              <option value="name">Name (A-Z)</option>
+              <option value="rarity">Rarity (High-Low)</option>
+            </select>
+          </div>
+        </div>
+      )}
+
       {view === 'stats' ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-          <div className="card-curved p-8">
-            <h3 className="text-xs uppercase tracking-widest font-bold mb-8">Distribution by Type</h3>
-            <div className="h-64">
+        <div className="grid grid-cols-1 gap-6">
+          <div className="card-curved p-6">
+            <h3 className="text-[10px] uppercase tracking-widest font-bold mb-6">Distribution by Type</h3>
+            <div className="h-48">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
                     data={typeData}
                     cx="50%"
                     cy="50%"
-                    innerRadius={60}
-                    outerRadius={80}
+                    innerRadius={50}
+                    outerRadius={70}
                     paddingAngle={5}
                     dataKey="value"
                   >
@@ -174,85 +260,99 @@ export const Inventory: React.FC = () => {
                     ))}
                   </Pie>
                   <Tooltip 
-                    contentStyle={{ borderRadius: '1rem', border: 'none', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}
+                    contentStyle={{ borderRadius: '1rem', border: 'none', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', fontSize: '10px' }}
                   />
                 </PieChart>
               </ResponsiveContainer>
             </div>
-            <div className="mt-8 grid grid-cols-2 gap-4">
+            <div className="mt-6 grid grid-cols-2 gap-3">
               {typeData.map((d, i) => (
-                <div key={d.name} className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
-                  <span className="text-[10px] uppercase tracking-tighter font-bold">{d.name} ({d.value})</span>
+                <div key={d.name} className="flex items-center gap-1.5">
+                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
+                  <span className="text-[8px] uppercase tracking-tighter font-bold truncate">{d.name} ({d.value})</span>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="card-curved p-8">
-            <h3 className="text-xs uppercase tracking-widest font-bold mb-8">Top Countries</h3>
-            <div className="h-64">
+          <div className="card-curved p-6">
+            <h3 className="text-[10px] uppercase tracking-widest font-bold mb-6">Top Countries</h3>
+            <div className="h-48">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={countryData} layout="vertical">
                   <XAxis type="number" hide />
                   <YAxis 
                     dataKey="name" 
                     type="category" 
-                    width={100} 
+                    width={80} 
                     axisLine={false} 
                     tickLine={false} 
-                    className="text-[10px] uppercase font-bold" 
+                    className="text-[8px] uppercase font-bold" 
                   />
                   <Tooltip 
                     cursor={{ fill: 'transparent' }}
-                    contentStyle={{ borderRadius: '1rem', border: 'none', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}
+                    contentStyle={{ borderRadius: '1rem', border: 'none', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', fontSize: '10px' }}
                   />
-                  <Bar dataKey="value" fill="#000000" radius={[0, 10, 10, 0]} barSize={20} />
+                  <Bar dataKey="value" fill="#000000" radius={[0, 10, 10, 0]} barSize={15} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {items.map((item) => (
+        <div className="grid grid-cols-2 gap-3">
+          {filteredAndSortedItems.map((item) => (
             <motion.div 
               key={item.id}
               layout
-              whileHover={{ y: -10 }}
-              className="group card-curved p-4"
+              whileHover={{ y: -5 }}
+              className="group card-curved p-3 bg-white hover:shadow-xl transition-all duration-500 border border-black/5"
             >
-              <div className="aspect-square bg-gray-50 rounded-[1.5rem] flex items-center justify-center mb-4 relative overflow-hidden">
+              <div 
+                className="aspect-square bg-gray-50 rounded-xl flex items-center justify-center mb-3 relative overflow-hidden cursor-pointer"
+                onClick={() => setSelectedItem(item)}
+              >
                 {item.imageUrl ? (
-                  <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
+                  <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                 ) : (
-                  <Globe className="text-gray-200" size={64} />
+                  <Globe className="text-gray-200" size={32} />
                 )}
-                <div className="absolute top-4 left-4">
-                  <span className="text-[8px] uppercase tracking-widest font-bold px-3 py-1 bg-black text-white rounded-full">
+                <div className="absolute top-2 left-2">
+                  <span className={`text-[6px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full border ${
+                    item.rarity === 'legendary' ? 'bg-yellow-400 text-black border-yellow-400' :
+                    item.rarity === 'rare' ? 'bg-black text-white border-black' : 'bg-white text-black border-gray-100'
+                  }`}>
                     {item.rarity}
                   </span>
                 </div>
                 <button 
-                  onClick={() => handleDeleteItem(item.id)}
-                  className="absolute top-4 right-4 p-2 bg-white/80 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:text-red-500"
+                  onClick={(e) => { e.stopPropagation(); handleDeleteItem(item.id); }}
+                  className="absolute top-2 right-2 p-1.5 bg-white/80 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:text-red-500 shadow-sm"
                 >
-                  <Trash2 size={14} />
+                  <Trash2 size={12} />
                 </button>
               </div>
-              <h3 className="font-display font-bold text-lg">{item.name}</h3>
-              <p className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">
-                {item.country} • {item.year}
-              </p>
-              <div className="mt-4 flex justify-between items-center">
-                <span className="text-[8px] uppercase tracking-tighter text-gray-400 font-bold">Source: {item.source}</span>
-                <span className="text-[10px] font-bold">Qty: {item.quantity}</span>
+              <div className="space-y-0.5">
+                <h3 className="font-display font-bold text-xs leading-tight truncate">{item.name}</h3>
+                <div className="flex items-center gap-1">
+                  <p className="text-[7px] text-gray-400 uppercase tracking-widest font-bold truncate max-w-[40px]">
+                    {item.country}
+                  </p>
+                  <span className="w-0.5 h-0.5 bg-gray-200 rounded-full" />
+                  <p className="text-[7px] text-gray-400 uppercase tracking-widest font-bold">
+                    {item.year}
+                  </p>
+                </div>
               </div>
             </motion.div>
           ))}
-          {items.length === 0 && !loading && (
-            <div className="col-span-full py-24 text-center border-2 border-dashed border-gray-100 rounded-[2rem]">
-              <p className="text-gray-400 font-display italic">Your collection is empty. Start by adding items from the shop or manually.</p>
+          {filteredAndSortedItems.length === 0 && !loading && (
+            <div className="col-span-full py-24 text-center border-2 border-dashed border-gray-100 rounded-[2rem] bg-gray-50/50">
+              <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-sm">
+                <Search size={32} className="text-gray-200" />
+              </div>
+              <h3 className="text-xl font-display font-bold">No items found</h3>
+              <p className="text-gray-400 font-medium mt-2">Try adjusting your filters or search terms.</p>
             </div>
           )}
         </div>
@@ -272,7 +372,7 @@ export const Inventory: React.FC = () => {
                 <Plus size={24} className="rotate-45" />
               </button>
             </div>
-            <form onSubmit={handleAddItem} className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <form onSubmit={handleAddItem} className="grid grid-cols-1 gap-8">
               <div className="space-y-6">
                 <div className="space-y-2">
                   <label className="text-[10px] uppercase font-bold tracking-widest text-gray-400">Name</label>
@@ -343,6 +443,15 @@ export const Inventory: React.FC = () => {
                     onChange={(e) => setNewItem({...newItem, quantity: parseInt(e.target.value)})}
                   />
                 </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] uppercase font-bold tracking-widest text-gray-400">Description</label>
+                  <textarea 
+                    className="input-field min-h-[100px] py-4" 
+                    value={newItem.description}
+                    onChange={(e) => setNewItem({...newItem, description: e.target.value})}
+                    placeholder="Tell the story of this piece..."
+                  />
+                </div>
               </div>
 
               <div className="space-y-6">
@@ -374,7 +483,83 @@ export const Inventory: React.FC = () => {
           </motion.div>
         </div>
       )}
+      {/* Item Detail Modal */}
+      <AnimatePresence>
+        {selectedItem && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-6">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="bg-white max-w-5xl w-full rounded-[3rem] shadow-2xl overflow-y-auto flex flex-col relative max-h-[90vh]"
+            >
+              <button 
+                onClick={() => setSelectedItem(null)}
+                className="absolute top-6 right-6 z-10 p-3 bg-white/80 backdrop-blur-md hover:bg-white rounded-full transition-all shadow-xl"
+              >
+                <X size={24} />
+              </button>
+
+              <div className="w-full bg-gray-50 relative aspect-square">
+                <img 
+                  src={selectedItem.imageUrl || `https://picsum.photos/seed/${selectedItem.id}/800/800`} 
+                  alt={selectedItem.name} 
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute top-8 left-8">
+                  <span className={`badge px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest ${
+                    selectedItem.rarity === 'legendary' ? 'bg-yellow-400 text-black border-yellow-400' :
+                    selectedItem.rarity === 'rare' ? 'bg-black text-white border-black' : 'bg-white text-black border-gray-100'
+                  }`}>
+                    {selectedItem.rarity}
+                  </span>
+                </div>
+              </div>
+
+              <div className="w-full p-8 flex flex-col justify-between">
+                <div className="space-y-8">
+                  <div className="space-y-2">
+                    <p className="text-[10px] text-gray-400 uppercase tracking-[0.2em] font-bold">
+                      {selectedItem.country} • {selectedItem.year} • {selectedItem.type}
+                    </p>
+                    <h2 className="text-4xl font-display font-bold leading-tight">{selectedItem.name}</h2>
+                  </div>
+
+                  <div className="space-y-4">
+                    <h3 className="text-[10px] uppercase font-bold tracking-widest text-gray-400">The Story</h3>
+                    <p className="text-gray-600 text-sm leading-relaxed font-sans">
+                      {selectedItem.description || "This rare piece has a rich history waiting to be discovered. Each detail reflects the era it belongs to, making it a prized addition to any serious collector's inventory."}
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-8 py-8 border-y border-gray-100">
+                    <div>
+                      <p className="text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-1">Source</p>
+                      <p className="text-2xl font-bold uppercase">{selectedItem.source}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-1">Quantity</p>
+                      <p className="text-2xl font-bold">{selectedItem.quantity}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-12 flex gap-4">
+                  <button 
+                    onClick={() => {
+                      handleDeleteItem(selectedItem.id);
+                      setSelectedItem(null);
+                    }}
+                    className="flex-1 flex items-center justify-center gap-3 py-6 rounded-2xl text-[10px] font-bold uppercase tracking-widest bg-red-500 text-white hover:bg-red-600 shadow-2xl hover:shadow-red-500/40 transition-all"
+                  >
+                    <Trash2 size={18} /> Remove
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
-

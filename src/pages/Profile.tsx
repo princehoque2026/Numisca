@@ -28,14 +28,17 @@ import {
   Star,
   Clock,
   X,
+  CheckCircle,
+  Edit,
+  Zap,
+  ShieldCheck,
   Camera,
   Save,
-  Loader2,
-  CheckCircle,
-  ShieldCheck
+  Loader2
 } from 'lucide-react';
 import { format } from 'date-fns';
 import Cropper from 'react-easy-crop';
+import { WorldMap } from '../components/WorldMap';
 import { 
   PieChart, 
   Pie, 
@@ -75,6 +78,7 @@ export const Profile: React.FC = () => {
   const [showCropper, setShowCropper] = useState(false);
   const [tempImage, setTempImage] = useState<string | null>(null);
   const [isCameraActive, setIsCameraActive] = useState(false);
+  const [collectedCountries, setCollectedCountries] = useState<string[]>([]);
   const videoRef = React.useRef<HTMLVideoElement>(null);
 
   const onCropComplete = React.useCallback((_croppedArea: any, croppedAreaPixels: any) => {
@@ -246,7 +250,9 @@ export const Profile: React.FC = () => {
     const q = query(collection(db, 'inventory'), where('ownerUid', '==', user.uid));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const items = snapshot.docs.map(doc => doc.data());
-      const countries = new Set(items.map(i => i.country)).size;
+      const countriesList = Array.from(new Set(items.map(i => i.country)));
+      const countriesCount = countriesList.length;
+      
       const typesMap = items.reduce((acc: any, item: any) => {
         acc[item.type] = (acc[item.type] || 0) + (item.quantity || 1);
         return acc;
@@ -259,9 +265,10 @@ export const Profile: React.FC = () => {
         color: name === 'coin' ? '#000000' : name === 'banknote' ? '#333333' : name === 'stamp' ? '#666666' : '#999999'
       }));
 
+      setCollectedCountries(countriesList);
       setInventoryStats({
         total: items.reduce((acc, i) => acc + (i.quantity || 1), 0),
-        countries,
+        countries: countriesCount,
         types: typesData
       });
     }, (error) => {
@@ -328,74 +335,74 @@ export const Profile: React.FC = () => {
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="card-curved p-8 md:p-12 flex flex-col md:flex-row gap-8 items-center md:items-start"
+        className="card-curved p-6 flex flex-col gap-6 items-center text-center"
       >
         <div className="relative group">
           <motion.img 
             whileHover={{ scale: 1.05 }}
             src={profile?.photoURL || user.photoURL || ''} 
             alt="Profile" 
-            className="w-40 h-40 rounded-full border-4 border-black object-cover shadow-2xl"
+            className="w-32 h-32 rounded-full border-4 border-black object-cover shadow-2xl"
             referrerPolicy="no-referrer"
           />
-          <div className="absolute -bottom-2 -right-2 bg-black text-white p-2 rounded-full border-4 border-white">
-            <Award size={20} />
+          <div className="absolute -bottom-1 -right-1 bg-black text-white p-2 rounded-full border-4 border-white">
+            <Award size={16} />
           </div>
         </div>
 
-        <div className="flex-1 text-center md:text-left space-y-6">
+        <div className="w-full space-y-6">
           <div className="space-y-4">
             <div>
-              <div className="flex items-center justify-center md:justify-start gap-3">
-                <h1 className="text-5xl font-display font-bold tracking-tight">{profile?.name}</h1>
+              <div className="flex items-center justify-center gap-2">
+                <h1 className="text-3xl font-display font-bold tracking-tight truncate max-w-[200px]">{profile?.name}</h1>
                 {profile?.verificationStatus === 'verified' && (
                   <motion.div 
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     className="text-blue-500"
                   >
-                    <CheckCircle size={32} fill="currentColor" className="text-white" />
+                    <CheckCircle size={24} fill="currentColor" className="text-white" />
                   </motion.div>
                 )}
               </div>
-              <div className="flex flex-wrap justify-center md:justify-start gap-4 mt-3">
-                <span className="text-xs uppercase tracking-[0.2em] font-bold px-4 py-1.5 bg-black text-white rounded-full">
+              <div className="flex flex-col items-center gap-2 mt-2">
+                <span className="text-[8px] uppercase tracking-[0.2em] font-bold px-3 py-1 bg-black text-white rounded-full">
                   {profile?.role === 'admin' ? 'Elite Administrator' : 'Advanced Collector'}
                 </span>
-                <div className="flex items-center gap-2 text-gray-400 text-xs font-bold uppercase tracking-widest">
-                  <MapPin size={14} />
+                <div className="flex items-center gap-1 text-gray-400 text-[10px] font-bold uppercase tracking-widest">
+                  <MapPin size={12} />
                   <span>{profile?.location || 'Global Collector'}</span>
                 </div>
               </div>
             </div>
             {profile?.bio && (
-              <p className="text-gray-500 max-w-2xl leading-relaxed">{profile.bio}</p>
+              <p className="text-xs text-gray-500 leading-relaxed line-clamp-3">{profile.bio}</p>
             )}
           </div>
 
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="stat-card">
-              <span className="text-2xl font-display font-bold">{inventoryStats.total}</span>
-              <span className="text-[8px] uppercase tracking-widest font-bold opacity-60">Total Items</span>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="stat-card p-3">
+              <span className="text-xl font-display font-bold">{inventoryStats.total}</span>
+              <span className="text-[7px] uppercase tracking-widest font-bold opacity-60">Total Items</span>
             </div>
-            <div className="stat-card">
-              <span className="text-2xl font-display font-bold">{profile?.wishlist?.length || 0}</span>
-              <span className="text-[8px] uppercase tracking-widest font-bold opacity-60">Wishlist</span>
+            <div className="stat-card p-3">
+              <span className="text-xl font-display font-bold">{profile?.wishlist?.length || 0}</span>
+              <span className="text-[7px] uppercase tracking-widest font-bold opacity-60">Wishlist</span>
             </div>
-            <div className="stat-card">
-              <span className="text-2xl font-display font-bold">{inventoryStats.countries}</span>
-              <span className="text-[8px] uppercase tracking-widest font-bold opacity-60">Countries</span>
+            <div className="stat-card p-3">
+              <span className="text-xl font-display font-bold">{inventoryStats.countries}</span>
+              <span className="text-[7px] uppercase tracking-widest font-bold opacity-60">Countries</span>
             </div>
-            <div className="stat-card">
-              <span className="text-2xl font-display font-bold">#--</span>
-              <span className="text-[8px] uppercase tracking-widest font-bold opacity-60">Ranking</span>
+            <div className="stat-card p-3">
+              <span className="text-xl font-display font-bold">#--</span>
+              <span className="text-[7px] uppercase tracking-widest font-bold opacity-60">Ranking</span>
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-4 justify-center md:justify-start">
+          <div className="flex flex-col gap-3">
             <button 
               onClick={() => setIsEditing(true)}
-              className="btn-pill flex items-center gap-2"
+              className="btn-pill w-full flex items-center justify-center gap-2 text-xs py-3"
             >
               <Settings size={14} /> Edit Profile
             </button>
@@ -403,18 +410,18 @@ export const Profile: React.FC = () => {
             {profile?.verificationStatus === 'none' && (
               <button 
                 onClick={handleApplyVerification}
-                className="btn-pill-outline flex items-center gap-2 border-blue-200 text-blue-600 hover:bg-blue-50"
+                className="btn-pill-outline w-full flex items-center justify-center gap-2 border-blue-200 text-blue-600 hover:bg-blue-50 text-xs py-3"
               >
                 <ShieldCheck size={14} /> Apply for Verification
               </button>
             )}
             {profile?.verificationStatus === 'pending' && (
-              <div className="px-6 py-3 bg-blue-50 text-blue-600 rounded-full text-[10px] font-bold uppercase tracking-widest border border-blue-100">
+              <div className="w-full py-3 bg-blue-50 text-blue-600 rounded-full text-[8px] font-bold uppercase tracking-widest border border-blue-100 text-center">
                 Verification Pending
               </div>
             )}
             
-            <button onClick={logout} className="btn-pill-outline flex items-center gap-2">
+            <button onClick={logout} className="btn-pill-outline w-full flex items-center justify-center gap-2 text-xs py-3">
               <LogOut size={14} /> Logout
             </button>
           </div>
@@ -609,26 +616,26 @@ export const Profile: React.FC = () => {
             View Full Inventory
           </button>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {inventoryStats.types.map((item, index) => (
             <motion.div
               key={item.name}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
-              className="card-curved p-6 group cursor-pointer"
+              className="card-curved p-5 group cursor-pointer"
             >
-              <div className="flex justify-between items-start mb-4">
-                <div className="p-3 bg-black text-white rounded-2xl group-hover:scale-110 transition-transform">
-                  <item.icon size={24} />
+              <div className="flex justify-between items-start mb-3">
+                <div className="p-2.5 bg-black text-white rounded-xl group-hover:scale-110 transition-transform">
+                  <item.icon size={20} />
                 </div>
-                <ChevronRight size={16} className="text-gray-300 group-hover:translate-x-1 transition-transform" />
+                <ChevronRight size={14} className="text-gray-300 group-hover:translate-x-1 transition-transform" />
               </div>
               <div className="space-y-1">
-                <h3 className="text-2xl font-display">{item.value}</h3>
-                <p className="text-xs uppercase tracking-widest font-bold text-gray-400">{item.name}</p>
+                <h3 className="text-xl font-display">{item.value}</h3>
+                <p className="text-[8px] uppercase tracking-widest font-bold text-gray-400">{item.name}</p>
               </div>
-              <div className="mt-4 h-1 bg-gray-100 rounded-full overflow-hidden">
+              <div className="mt-3 h-1 bg-gray-100 rounded-full overflow-hidden">
                 <motion.div 
                   initial={{ width: 0 }}
                   animate={{ width: `${(item.value / (inventoryStats.total || 1)) * 100}%` }}
@@ -647,17 +654,34 @@ export const Profile: React.FC = () => {
       </section>
 
       {/* Statistics & Visualizations */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 gap-6">
         <motion.section 
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="card-curved p-8 space-y-6"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="card-curved p-6 space-y-6"
         >
-          <div className="flex items-center gap-3">
-            <TrendingUp size={20} />
-            <h2 className="text-xl font-display">Distribution</h2>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Globe size={18} />
+              <h2 className="text-lg font-display">Global Presence</h2>
+            </div>
+            <span className="text-[8px] uppercase tracking-widest font-bold text-gray-400">{inventoryStats.countries} Countries</span>
           </div>
-          <div className="h-[300px]">
+          <div className="h-[200px]">
+            <WorldMap collectedCountries={collectedCountries} />
+          </div>
+        </motion.section>
+
+        <motion.section 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="card-curved p-6 space-y-6"
+        >
+          <div className="flex items-center gap-2">
+            <TrendingUp size={18} />
+            <h2 className="text-lg font-display">Distribution</h2>
+          </div>
+          <div className="h-[250px]">
             {inventoryStats.types.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -665,9 +689,9 @@ export const Profile: React.FC = () => {
                     data={inventoryStats.types}
                     cx="50%"
                     cy="50%"
-                    innerRadius={60}
-                    outerRadius={100}
-                    paddingAngle={5}
+                    innerRadius={50}
+                    outerRadius={70}
+                    paddingAngle={8}
                     dataKey="value"
                   >
                     {inventoryStats.types.map((entry, index) => (
@@ -675,118 +699,162 @@ export const Profile: React.FC = () => {
                     ))}
                   </Pie>
                   <Tooltip 
-                    contentStyle={{ borderRadius: '1rem', border: 'none', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}
+                    contentStyle={{ borderRadius: '1rem', border: 'none', boxShadow: '0 10px 30px rgba(0,0,0,0.1)', padding: '0.5rem', fontSize: '10px' }}
                   />
-                  <Legend verticalAlign="bottom" height={36}/>
                 </PieChart>
               </ResponsiveContainer>
             ) : (
               <div className="h-full flex items-center justify-center text-gray-300">
-                <TrendingUp size={48} className="opacity-20" />
+                <TrendingUp size={32} className="opacity-20" />
               </div>
             )}
           </div>
-        </motion.section>
-
-        <motion.section 
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="card-curved p-8 space-y-6"
-        >
-          <div className="flex items-center gap-3">
-            <Globe size={20} />
-            <h2 className="text-xl font-display">Collection Stats</h2>
-          </div>
-          <div className="h-[300px] flex flex-col justify-center space-y-8">
-            <div className="flex items-center justify-between p-6 bg-gray-50 rounded-3xl">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-black text-white rounded-2xl flex items-center justify-center">
-                  <Globe size={24} />
+          <div className="grid grid-cols-2 gap-2">
+            {inventoryStats.types.map((type) => (
+              <div key={type.name} className="flex items-center justify-between p-2 bg-gray-50 rounded-xl">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: type.color }} />
+                  <span className="text-[7px] uppercase font-bold tracking-widest text-gray-500 truncate max-w-[50px]">{type.name}</span>
                 </div>
-                <div>
-                  <h4 className="text-sm font-bold uppercase tracking-widest">Countries</h4>
-                  <p className="text-xs text-gray-400">Represented in collection</p>
-                </div>
+                <span className="text-[10px] font-bold">{type.value}</span>
               </div>
-              <span className="text-4xl font-display font-bold">{inventoryStats.countries}</span>
-            </div>
-            <div className="flex items-center justify-between p-6 bg-gray-50 rounded-3xl">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-black text-white rounded-2xl flex items-center justify-center">
-                  <Star size={24} />
-                </div>
-                <div>
-                  <h4 className="text-sm font-bold uppercase tracking-widest">Rarity Score</h4>
-                  <p className="text-xs text-gray-400">Average item quality</p>
-                </div>
-              </div>
-              <span className="text-4xl font-display font-bold">A+</span>
-            </div>
+            ))}
           </div>
         </motion.section>
       </div>
 
-      {/* Wishlist */}
-      <section className="space-y-6">
-        <h2 className="text-3xl font-display">My Wishlist</h2>
-        {wishlistItems.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {wishlistItems.map((item) => (
+      {/* Swap & Wishlist */}
+      <div className="grid grid-cols-1 gap-8">
+        <section className="space-y-6">
+          <div className="flex justify-between items-end">
+            <h2 className="text-2xl font-display">Recent Swaps</h2>
+            <button className="text-[8px] font-bold uppercase tracking-widest text-gray-400 hover:text-black transition-colors">View All</button>
+          </div>
+          <div className="space-y-3">
+            {[
+              { id: 1, partner: 'Alex K.', item: '1924 Silver Dollar', type: 'Received', date: '2d ago' },
+              { id: 2, partner: 'Sarah M.', item: 'Victorian Stamp Set', type: 'Sent', date: '5d ago' },
+            ].map((swap) => (
               <motion.div 
-                key={item.id}
-                whileHover={{ y: -5 }}
-                className="card-curved p-4 bg-white group"
+                key={swap.id}
+                whileHover={{ x: 5 }}
+                className="card-curved p-4 flex items-center justify-between group cursor-pointer border border-black/5"
               >
-                <div className="aspect-square bg-gray-50 rounded-2xl overflow-hidden mb-4">
-                  <img 
-                    src={item.imageUrl || `https://picsum.photos/seed/${item.id}/400/400`} 
-                    alt={item.name}
-                    className="w-full h-full object-cover transition-all"
-                    referrerPolicy="no-referrer"
-                  />
-                </div>
-                <div className="flex justify-between items-center">
-                  <div>
-                    <h4 className="text-sm font-bold uppercase tracking-widest">{item.name}</h4>
-                    <p className="text-xs text-gray-400 font-bold">${item.price}</p>
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${swap.type === 'Received' ? 'bg-green-50 text-green-600' : 'bg-blue-50 text-blue-600'}`}>
+                    <Repeat size={16} />
                   </div>
-                  <button className="p-2 bg-black text-white rounded-xl hover:scale-110 transition-transform">
-                    <ShoppingBag size={14} />
-                  </button>
+                  <div className="min-w-0">
+                    <h4 className="text-[10px] font-bold uppercase tracking-widest truncate max-w-[150px]">{swap.item}</h4>
+                    <p className="text-[7px] text-gray-400 font-bold uppercase tracking-tighter truncate">With {swap.partner} • {swap.type}</p>
+                  </div>
                 </div>
+                <span className="text-[8px] font-bold text-gray-300 uppercase tracking-widest whitespace-nowrap">{swap.date}</span>
               </motion.div>
             ))}
           </div>
-        ) : (
-          <div className="py-12 text-center card-curved bg-gray-50 border-dashed border-2 border-gray-200">
-            <Heart size={32} className="mx-auto text-gray-200 mb-4" />
-            <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">Your wishlist is empty</p>
+        </section>
+
+        <section className="space-y-6">
+          <div className="flex justify-between items-end">
+            <h2 className="text-2xl font-display">Wishlist</h2>
+            <button className="text-[8px] font-bold uppercase tracking-widest text-gray-400 hover:text-black transition-colors">View All</button>
           </div>
-        )}
+          <div className="space-y-3">
+            {wishlistItems.slice(0, 3).map((item) => (
+              <motion.div 
+                key={item.id}
+                whileHover={{ scale: 1.02 }}
+                className="card-curved p-3 flex items-center gap-3 group cursor-pointer border border-black/5"
+              >
+                <div className="w-12 h-12 bg-gray-50 rounded-lg overflow-hidden flex-shrink-0">
+                  <img 
+                    src={item.imageUrl || `https://picsum.photos/seed/${item.id}/200/200`} 
+                    alt={item.name}
+                    className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
+                    referrerPolicy="no-referrer"
+                  />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h4 className="text-[8px] font-bold uppercase tracking-widest leading-tight truncate">{item.name}</h4>
+                  <p className="text-[10px] font-bold mt-0.5">৳{item.price}</p>
+                </div>
+                <button className="p-1.5 text-gray-300 hover:text-black transition-colors">
+                  <Heart size={14} />
+                </button>
+              </motion.div>
+            ))}
+            {wishlistItems.length === 0 && (
+              <div className="py-8 text-center card-curved bg-gray-50/50 border-dashed border-2 border-gray-100">
+                <Heart size={20} className="mx-auto text-gray-200 mb-2" />
+                <p className="text-[8px] text-gray-400 font-bold uppercase tracking-widest">Empty Wishlist</p>
+              </div>
+            )}
+          </div>
+        </section>
+      </div>
+
+      {/* Activity Feed / Timeline */}
+      <section className="space-y-8">
+        <div className="flex items-center gap-4">
+          <Clock size={24} />
+          <h2 className="text-3xl font-display">Activity Timeline</h2>
+        </div>
+        <div className="relative pl-8 space-y-8 before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-0.5 before:bg-gray-100">
+          {[
+            { id: 1, action: 'Added 3 coins from Germany', date: 'Today, 2:30 PM', icon: Plus },
+            { id: 2, action: 'Completed swap with Alex K.', date: 'Yesterday', icon: CheckCircle },
+            { id: 3, action: 'Updated profile bio', date: 'Mar 22, 2026', icon: Edit },
+            { id: 4, action: 'Joined Numisca Society', date: 'Mar 20, 2026', icon: Users },
+          ].map((activity) => (
+            <motion.div 
+              key={activity.id}
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="relative group"
+            >
+              <div className="absolute -left-[29px] top-1 w-6 h-6 bg-white border-2 border-black rounded-full flex items-center justify-center z-10 group-hover:scale-110 transition-transform">
+                <activity.icon size={12} />
+              </div>
+              <div className="card-curved p-6 hover:shadow-xl transition-all duration-500 border border-black/5">
+                <div className="flex justify-between items-start">
+                  <h4 className="text-sm font-bold uppercase tracking-widest">{activity.action}</h4>
+                  <span className="text-[10px] font-bold text-gray-300 uppercase tracking-widest">{activity.date}</span>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
       </section>
 
       {/* Achievements */}
-      <section className="space-y-6">
-        <h2 className="text-2xl font-display">Achievements</h2>
-        <div className="flex flex-wrap gap-8 justify-center md:justify-start">
+      <section className="space-y-8">
+        <div className="flex items-center gap-4">
+          <Award size={24} />
+          <h2 className="text-3xl font-display">Achievements</h2>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-8">
           {[
             { id: 1, name: 'First Purchase', icon: ShoppingBag, description: 'Made your first acquisition' },
             { id: 2, name: 'Swap Master', icon: Repeat, description: 'Completed 10 successful swaps' },
             { id: 3, name: 'Rare Find', icon: Star, description: 'Added a rare item to collection' },
             { id: 4, name: 'World Traveler', icon: Globe, description: 'Items from 10+ countries' },
+            { id: 5, name: 'Verified', icon: ShieldCheck, description: 'Identity verified by Society' },
+            { id: 6, name: 'Early Adopter', icon: Zap, description: 'Joined during Beta phase' },
           ].map((badge) => (
             <motion.div 
               key={badge.id}
               whileHover={{ y: -10 }}
-              className="flex flex-col items-center gap-3 group"
+              className="flex flex-col items-center gap-4 group cursor-help"
             >
-              <div className="badge-icon relative">
-                <badge.icon size={24} />
-                <div className="absolute inset-0 bg-black/5 rounded-full scale-0 group-hover:scale-100 transition-transform" />
+              <div className="w-20 h-20 bg-gray-50 rounded-[1.5rem] flex items-center justify-center relative group-hover:bg-black group-hover:text-white transition-all duration-500 shadow-sm group-hover:shadow-2xl">
+                <badge.icon size={32} />
+                <div className="absolute inset-0 border-2 border-black/5 rounded-[1.5rem] group-hover:border-white/20 transition-colors" />
               </div>
-              <div className="text-center">
+              <div className="text-center space-y-1">
                 <h4 className="text-[10px] font-bold uppercase tracking-widest">{badge.name}</h4>
-                <p className="text-[8px] text-gray-400 uppercase font-bold max-w-[80px]">{badge.description}</p>
+                <p className="text-[8px] text-gray-400 uppercase font-bold max-w-[100px] leading-tight opacity-0 group-hover:opacity-100 transition-opacity">{badge.description}</p>
               </div>
             </motion.div>
           ))}

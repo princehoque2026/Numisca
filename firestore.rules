@@ -59,7 +59,8 @@ service cloud.firestore {
     
     match /collectibles/{id} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow update: if isAuthenticated();
+      allow create, delete: if isAdmin();
     }
     
     match /inventory/{id} {
@@ -83,6 +84,18 @@ service cloud.firestore {
         allow read: if isAuthenticated() && request.auth.uid in get(/databases/$(database)/documents/chats/$(id)).data.participants;
         allow create: if isAuthenticated() && request.auth.uid == request.resource.data.senderUid;
       }
+    }
+
+    match /transactions/{id} {
+      allow read: if isAdmin() || (isAuthenticated() && resource.data.userUid == request.auth.uid);
+      allow create: if isAuthenticated() && request.resource.data.userUid == request.auth.uid;
+    }
+    
+    match /notifications/{id} {
+      allow read: if isAuthenticated() && resource.data.userUid == request.auth.uid;
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && resource.data.userUid == request.auth.uid;
+      allow delete: if isAuthenticated() && resource.data.userUid == request.auth.uid;
     }
   }
 }

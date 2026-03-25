@@ -17,6 +17,7 @@ interface Collectible {
   imageUrl: string;
   rarity: 'common' | 'uncommon' | 'rare' | 'legendary';
   status: 'available' | 'sold';
+  description?: string;
 }
 
 export const Shop: React.FC = () => {
@@ -25,8 +26,11 @@ export const Shop: React.FC = () => {
   const [items, setItems] = React.useState<Collectible[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [filter, setFilter] = React.useState('all');
+  const [rarityFilter, setRarityFilter] = React.useState('all');
+  const [sortBy, setSortBy] = React.useState('newest');
   const [search, setSearch] = React.useState('');
   const [isAdding, setIsAdding] = React.useState(false);
+  const [selectedProduct, setSelectedProduct] = React.useState<Collectible | null>(null);
   const [addedToCart, setAddedToCart] = React.useState<string | null>(null);
 
   const toggleWishlist = async (itemId: string) => {
@@ -46,7 +50,8 @@ export const Shop: React.FC = () => {
       id: item.id,
       name: item.name,
       price: item.price,
-      imageUrl: item.imageUrl
+      imageUrl: item.imageUrl,
+      description: item.description
     });
     setAddedToCart(item.id);
     setTimeout(() => setAddedToCart(null), 2000);
@@ -62,7 +67,8 @@ export const Shop: React.FC = () => {
     price: 0,
     imageUrl: '',
     rarity: 'common',
-    status: 'available'
+    status: 'available',
+    description: ''
   });
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -106,7 +112,8 @@ export const Shop: React.FC = () => {
         price: 0,
         imageUrl: '',
         rarity: 'common',
-        status: 'available'
+        status: 'available',
+        description: ''
       });
     } catch (error) {
       handleFirestoreError(error, OperationType.CREATE, 'collectibles');
@@ -122,32 +129,44 @@ export const Shop: React.FC = () => {
     }
   };
 
-  const filteredItems = items.filter(item => {
-    const matchesFilter = filter === 'all' || item.type === filter;
-    const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase()) || 
-                          item.country.toLowerCase().includes(search.toLowerCase());
-    return matchesFilter && matchesSearch;
-  });
+  const filteredAndSortedItems = React.useMemo(() => {
+    let result = items.filter(item => {
+      const matchesType = filter === 'all' || item.type === filter;
+      const matchesRarity = rarityFilter === 'all' || item.rarity === rarityFilter;
+      const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase()) || 
+                            item.country.toLowerCase().includes(search.toLowerCase());
+      return matchesType && matchesRarity && matchesSearch;
+    });
+
+    result.sort((a, b) => {
+      if (sortBy === 'price-low') return a.price - b.price;
+      if (sortBy === 'price-high') return b.price - a.price;
+      if (sortBy === 'name') return a.name.localeCompare(b.name);
+      return 0; // Default newest (handled by Firestore order if needed, but here we just keep it)
+    });
+
+    return result;
+  }, [items, filter, rarityFilter, sortBy, search]);
 
   return (
     <div className="space-y-12">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6"
+        className="flex flex-col gap-4"
       >
         <div>
-          <h1 className="text-5xl font-display font-bold tracking-tight">The Shop</h1>
-          <p className="text-gray-500 mt-2 font-sans">Exclusive collectibles curated by Numisca admins.</p>
+          <h1 className="text-3xl font-display font-bold tracking-tight">The Shop</h1>
+          <p className="text-xs text-gray-500 mt-1 font-sans">Exclusive collectibles curated by Numisca admins.</p>
         </div>
         
-        <div className="flex items-center gap-4 w-full md:w-auto">
-          <div className="relative flex-1 md:w-64">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+        <div className="flex items-center gap-2 w-full">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
             <input 
               type="text" 
               placeholder="Search items..." 
-              className="input-field pl-10"
+              className="input-field pl-9 py-2 text-xs"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -155,67 +174,93 @@ export const Shop: React.FC = () => {
           {isAdmin && (
             <button 
               onClick={() => setIsAdding(true)}
-              className="btn-primary flex items-center gap-2"
+              className="btn-primary flex items-center gap-1 px-3 py-2 text-[10px]"
             >
-              <Plus size={16} /> Add Item
+              <Plus size={14} /> Add
             </button>
           )}
         </div>
       </motion.div>
 
-      {/* Filters */}
-      <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
-        {['all', 'coin', 'banknote', 'stamp', 'keychain', 'other'].map((t) => (
-          <button
-            key={t}
-            onClick={() => setFilter(t)}
-            className={`text-[10px] uppercase tracking-widest font-bold px-6 py-2 rounded-full transition-all border ${
-              filter === t 
-                ? 'bg-black text-white border-black' 
-                : 'bg-white text-gray-400 border-gray-100 hover:border-black hover:text-black'
-            }`}
+      {/* Controls Bar */}
+      <div className="flex flex-col gap-4">
+        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4">
+          {['all', 'coin', 'banknote', 'stamp', 'keychain', 'other'].map((t) => (
+            <button
+              key={t}
+              onClick={() => setFilter(t)}
+              className={`text-[9px] uppercase tracking-widest font-bold px-4 py-1.5 rounded-full transition-all border whitespace-nowrap ${
+                filter === t 
+                  ? 'bg-black text-white border-black' 
+                  : 'bg-white text-gray-400 border-gray-100'
+              }`}
+            >
+              {t}s
+            </button>
+          ))}
+        </div>
+
+        <div className="flex items-center gap-2">
+          <select 
+            value={rarityFilter}
+            onChange={(e) => setRarityFilter(e.target.value)}
+            className="flex-1 text-[9px] uppercase font-bold tracking-widest bg-white border border-gray-100 rounded-full px-3 py-2 outline-none focus:border-black transition-colors"
           >
-            {t}s
-          </button>
-        ))}
+            <option value="all">All Rarities</option>
+            <option value="common">Common</option>
+            <option value="uncommon">Uncommon</option>
+            <option value="rare">Rare</option>
+            <option value="legendary">Legendary</option>
+          </select>
+
+          <select 
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="flex-1 text-[9px] uppercase font-bold tracking-widest bg-white border border-gray-100 rounded-full px-3 py-2 outline-none focus:border-black transition-colors"
+          >
+            <option value="newest">Newest</option>
+            <option value="price-low">Price: Low-High</option>
+            <option value="price-high">Price: High-Low</option>
+            <option value="name">Name</option>
+          </select>
+        </div>
       </div>
 
-      {/* Add Item Modal */}
       <AnimatePresence>
         {isAdding && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-6">
+          <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/60 backdrop-blur-sm">
             <motion.div 
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="bg-white p-8 max-w-2xl w-full rounded-[2rem] shadow-2xl max-h-[90vh] overflow-y-auto relative"
+              initial={{ opacity: 0, y: "100%" }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: "100%" }}
+              className="bg-white w-full rounded-t-[2rem] shadow-2xl max-h-[90vh] overflow-y-auto relative p-6"
             >
-              <div className="flex justify-between items-center mb-8">
-                <h2 className="text-3xl font-display font-bold">New Collectible</h2>
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-display font-bold">New Collectible</h2>
                 <button 
                   onClick={() => setIsAdding(false)}
                   className="p-2 hover:bg-gray-100 rounded-full transition-colors"
                 >
-                  <X size={24} />
+                  <X size={20} />
                 </button>
               </div>
-              <form onSubmit={handleAddItem} className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="space-y-6">
-                  <div className="space-y-2">
-                    <label className="text-[10px] uppercase font-bold tracking-widest text-gray-400 ml-1">Name</label>
+              <form onSubmit={handleAddItem} className="space-y-4">
+                <div className="space-y-4">
+                  <div className="space-y-1">
+                    <label className="text-[9px] uppercase font-bold tracking-widest text-gray-400 ml-1">Name</label>
                     <input 
                       required
                       type="text" 
-                      className="input-field" 
+                      className="input-field py-2 text-xs" 
                       value={newItem.name}
                       onChange={(e) => setNewItem({...newItem, name: e.target.value})}
                     />
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <label className="text-[10px] uppercase font-bold tracking-widest text-gray-400 ml-1">Type</label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <label className="text-[9px] uppercase font-bold tracking-widest text-gray-400 ml-1">Type</label>
                       <select 
-                        className="input-field"
+                        className="input-field py-2 text-xs"
                         value={newItem.type}
                         onChange={(e) => setNewItem({...newItem, type: e.target.value as any})}
                       >
@@ -226,42 +271,42 @@ export const Shop: React.FC = () => {
                         <option value="other">Other</option>
                       </select>
                     </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] uppercase font-bold tracking-widest text-gray-400 ml-1">Price ($)</label>
+                    <div className="space-y-1">
+                      <label className="text-[9px] uppercase font-bold tracking-widest text-gray-400 ml-1">Price (৳)</label>
                       <input 
                         required
                         type="number" 
-                        className="input-field" 
+                        className="input-field py-2 text-xs" 
                         value={newItem.price}
                         onChange={(e) => setNewItem({...newItem, price: parseFloat(e.target.value)})}
                       />
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <label className="text-[10px] uppercase font-bold tracking-widest text-gray-400 ml-1">Country</label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <label className="text-[9px] uppercase font-bold tracking-widest text-gray-400 ml-1">Country</label>
                       <input 
                         required
                         type="text" 
-                        className="input-field" 
+                        className="input-field py-2 text-xs" 
                         value={newItem.country}
                         onChange={(e) => setNewItem({...newItem, country: e.target.value})}
                       />
                     </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] uppercase font-bold tracking-widest text-gray-400 ml-1">Year</label>
+                    <div className="space-y-1">
+                      <label className="text-[9px] uppercase font-bold tracking-widest text-gray-400 ml-1">Year</label>
                       <input 
                         type="number" 
-                        className="input-field" 
+                        className="input-field py-2 text-xs" 
                         value={newItem.year}
                         onChange={(e) => setNewItem({...newItem, year: parseInt(e.target.value)})}
                       />
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-[10px] uppercase font-bold tracking-widest text-gray-400 ml-1">Rarity</label>
+                  <div className="space-y-1">
+                    <label className="text-[9px] uppercase font-bold tracking-widest text-gray-400 ml-1">Rarity</label>
                     <select 
-                      className="input-field"
+                      className="input-field py-2 text-xs"
                       value={newItem.rarity}
                       onChange={(e) => setNewItem({...newItem, rarity: e.target.value as any})}
                     >
@@ -271,32 +316,41 @@ export const Shop: React.FC = () => {
                       <option value="legendary">Legendary</option>
                     </select>
                   </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] uppercase font-bold tracking-widest text-gray-400 ml-1">Description</label>
+                    <textarea 
+                      className="input-field min-h-[80px] py-2 text-xs" 
+                      value={newItem.description}
+                      onChange={(e) => setNewItem({...newItem, description: e.target.value})}
+                      placeholder="Tell the story of this piece..."
+                    />
+                  </div>
                 </div>
 
-                <div className="space-y-6">
-                  <div className="space-y-2">
-                    <label className="text-[10px] uppercase font-bold tracking-widest text-gray-400 ml-1">Item Image</label>
-                    <div className="aspect-square bg-gray-50 rounded-[2rem] border-2 border-dashed border-gray-200 flex flex-col items-center justify-center relative overflow-hidden group">
+                <div className="space-y-4">
+                  <div className="space-y-1">
+                    <label className="text-[9px] uppercase font-bold tracking-widest text-gray-400 ml-1">Item Image</label>
+                    <div className="aspect-video bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center relative overflow-hidden group">
                       {newItem.imageUrl ? (
                         <>
                           <img src={newItem.imageUrl} alt="Preview" className="w-full h-full object-cover" />
-                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                            <label className="cursor-pointer p-4 bg-white text-black rounded-full shadow-xl hover:scale-110 transition-transform">
-                              <Upload size={24} />
+                          <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                            <label className="cursor-pointer p-3 bg-white text-black rounded-full shadow-xl">
+                              <Upload size={20} />
                               <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
                             </label>
                           </div>
                         </>
                       ) : (
-                        <label className="cursor-pointer flex flex-col items-center gap-3 text-gray-400 hover:text-black transition-colors">
-                          <Upload size={48} />
-                          <span className="text-[10px] uppercase font-bold tracking-widest">Upload Photo</span>
+                        <label className="cursor-pointer flex flex-col items-center gap-2 text-gray-400">
+                          <Upload size={32} />
+                          <span className="text-[9px] uppercase font-bold tracking-widest">Upload Photo</span>
                           <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
                         </label>
                       )}
                     </div>
                   </div>
-                  <button type="submit" className="btn-primary w-full py-6 text-lg rounded-2xl">Add to Shop</button>
+                  <button type="submit" className="btn-primary w-full py-4 text-sm rounded-xl">Add to Shop</button>
                 </div>
               </form>
             </motion.div>
@@ -310,91 +364,178 @@ export const Shop: React.FC = () => {
           <div className="w-8 h-8 border-4 border-black border-t-transparent rounded-full animate-spin" />
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {filteredItems.map((item, index) => (
+        <div className="grid grid-cols-1 gap-4">
+          {filteredAndSortedItems.map((item, index) => (
             <motion.div 
               key={item.id}
               layout
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
-              className="group card-curved hover-lift p-4 bg-white"
+              className="group card-curved p-3 bg-white border border-black/5 flex gap-4"
             >
-              <div className="aspect-square bg-gray-50 rounded-2xl overflow-hidden relative mb-4">
+              <div 
+                className="w-24 h-24 bg-gray-50 rounded-xl overflow-hidden relative flex-shrink-0"
+                onClick={() => setSelectedProduct(item)}
+              >
                 <img 
                   src={item.imageUrl || `https://picsum.photos/seed/${item.id}/600/600`} 
                   alt={item.name} 
-                  className="w-full h-full object-cover transition-all duration-700 scale-110 group-hover:scale-100"
+                  className="w-full h-full object-cover"
                   referrerPolicy="no-referrer"
                 />
-                <div className="absolute top-3 left-3 flex flex-col gap-1">
-                  <span className={`badge ${
-                    item.rarity === 'legendary' ? 'bg-yellow-400 text-black border-yellow-400' :
-                    item.rarity === 'rare' ? 'bg-black text-white border-black' : 'bg-white text-black border-gray-100'
+                <div className="absolute top-1 left-1">
+                  <span className={`text-[7px] px-1.5 py-0.5 rounded-full font-bold uppercase tracking-widest ${
+                    item.rarity === 'legendary' ? 'bg-yellow-400 text-black' :
+                    item.rarity === 'rare' ? 'bg-black text-white' : 'bg-white text-black'
                   }`}>
                     {item.rarity}
                   </span>
                 </div>
               </div>
               
-              <div className="space-y-2 px-1">
-                <div className="flex justify-between items-start">
-                  <h3 className="font-display font-bold text-lg leading-tight">{item.name}</h3>
-                  <span className="font-bold text-lg">${item.price}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <p className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">
+              <div className="flex-1 flex flex-col justify-between min-w-0">
+                <div onClick={() => setSelectedProduct(item)} className="cursor-pointer">
+                  <div className="flex justify-between items-start gap-2">
+                    <h3 className="font-display font-bold text-sm leading-tight truncate">{item.name}</h3>
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleWishlist(item.id);
+                      }}
+                      className={`p-1.5 rounded-lg transition-all ${
+                        profile?.wishlist?.includes(item.id)
+                          ? 'bg-red-500 text-white'
+                          : 'bg-gray-50 text-black'
+                      }`}
+                    >
+                      <Heart size={12} className={profile?.wishlist?.includes(item.id) ? 'fill-current' : ''} />
+                    </button>
+                  </div>
+                  <p className="text-[9px] text-gray-400 uppercase tracking-widest font-bold mt-1">
                     {item.country} • {item.year}
                   </p>
-                  <span className="w-1 h-1 bg-gray-200 rounded-full" />
-                  <p className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">
-                    {item.type}
-                  </p>
                 </div>
-              </div>
-
-              <div className="mt-6 flex gap-2">
-                <button 
-                  onClick={() => handleAddToCart(item)}
-                  className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-[10px] font-bold transition-all ${
-                    addedToCart === item.id 
-                      ? 'bg-green-500 text-white' 
-                      : 'bg-black text-white hover:bg-black/90'
-                  }`}
-                >
-                  {addedToCart === item.id ? (
-                    <>
-                      <Check size={14} /> Added
-                    </>
-                  ) : (
-                    <>
-                      <ShoppingCart size={14} /> Add to Cart
-                    </>
-                  )}
-                </button>
-                <button 
-                  onClick={() => toggleWishlist(item.id)}
-                  className={`p-3 rounded-xl border transition-all ${
-                    profile?.wishlist?.includes(item.id)
-                      ? 'bg-red-50 border-red-200 text-red-500'
-                      : 'border-gray-100 text-black hover:border-black'
-                  }`}
-                >
-                  <Heart size={16} className={profile?.wishlist?.includes(item.id) ? 'fill-current' : ''} />
-                </button>
-                {isAdmin && (
-                  <button 
-                    onClick={() => handleDeleteItem(item.id)}
-                    className="p-3 border border-gray-100 rounded-xl hover:bg-red-50 hover:border-red-200 hover:text-red-500 transition-all"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                )}
+                
+                <div className="flex items-center justify-between mt-2">
+                  <span className="font-bold text-base">৳{item.price}</span>
+                  <div className="flex gap-1">
+                    <button 
+                      onClick={() => handleAddToCart(item)}
+                      disabled={item.status === 'sold'}
+                      className={`flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all ${
+                        item.status === 'sold'
+                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                          : addedToCart === item.id 
+                            ? 'bg-green-500 text-white' 
+                            : 'bg-black text-white'
+                      }`}
+                    >
+                      {item.status === 'sold' ? 'Sold' : addedToCart === item.id ? 'Added' : 'Add'}
+                    </button>
+                    {isAdmin && (
+                      <button 
+                        onClick={() => handleDeleteItem(item.id)}
+                        className="p-1.5 border border-gray-100 rounded-lg text-red-500"
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    )}
+                  </div>
+                </div>
               </div>
             </motion.div>
           ))}
         </div>
       )}
+      <AnimatePresence>
+        {selectedProduct && (
+          <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/60 backdrop-blur-sm">
+            <motion.div 
+              initial={{ opacity: 0, y: "100%" }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: "100%" }}
+              className="bg-white w-full rounded-t-[2rem] shadow-2xl overflow-y-auto relative max-h-[90vh]"
+            >
+              <button 
+                onClick={() => setSelectedProduct(null)}
+                className="absolute top-4 right-4 z-10 p-2 bg-white/80 backdrop-blur-md rounded-full shadow-lg"
+              >
+                <X size={20} />
+              </button>
+
+              <div className="w-full bg-gray-50 relative aspect-square">
+                <img 
+                  src={selectedProduct.imageUrl} 
+                  alt={selectedProduct.name} 
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute top-4 left-4">
+                  <span className={`text-[9px] px-4 py-1.5 rounded-full font-bold uppercase tracking-widest ${
+                    selectedProduct.rarity === 'legendary' ? 'bg-yellow-400 text-black' :
+                    selectedProduct.rarity === 'rare' ? 'bg-black text-white' : 'bg-white text-black'
+                  }`}>
+                    {selectedProduct.rarity}
+                  </span>
+                </div>
+              </div>
+
+              <div className="p-6 space-y-6">
+                <div className="space-y-1">
+                  <p className="text-[9px] text-gray-400 uppercase tracking-[0.2em] font-bold">
+                    {selectedProduct.country} • {selectedProduct.year} • {selectedProduct.type}
+                  </p>
+                  <h2 className="text-2xl font-display font-bold leading-tight">{selectedProduct.name}</h2>
+                </div>
+
+                <div className="space-y-2">
+                  <h3 className="text-[9px] uppercase font-bold tracking-widest text-gray-400">The Story</h3>
+                  <p className="text-gray-600 text-xs leading-relaxed font-sans">
+                    {selectedProduct.description || "This rare piece has a rich history waiting to be discovered."}
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 py-4 border-y border-gray-100">
+                  <div>
+                    <p className="text-[9px] text-gray-400 uppercase tracking-widest font-bold mb-0.5">Price</p>
+                    <p className="text-lg font-bold">৳{selectedProduct.price}</p>
+                  </div>
+                  <div>
+                    <p className="text-[9px] text-gray-400 uppercase tracking-widest font-bold mb-0.5">Stock</p>
+                    <p className="text-lg font-bold">{selectedProduct.quantity} Left</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-3">
+                  <button 
+                    onClick={() => handleAddToCart(selectedProduct)}
+                    disabled={selectedProduct.status === 'sold'}
+                    className={`flex-1 flex items-center justify-center gap-2 py-4 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all ${
+                      selectedProduct.status === 'sold'
+                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                        : addedToCart === selectedProduct.id 
+                          ? 'bg-green-500 text-white' 
+                          : 'bg-black text-white'
+                    }`}
+                  >
+                    {selectedProduct.status === 'sold' ? 'Sold Out' : addedToCart === selectedProduct.id ? 'Added' : 'Add to Cart'}
+                  </button>
+                  <button 
+                    onClick={() => toggleWishlist(selectedProduct.id)}
+                    className={`p-4 rounded-xl border transition-all ${
+                      profile?.wishlist?.includes(selectedProduct.id)
+                        ? 'bg-red-500 text-white border-red-500'
+                        : 'border-gray-100 text-black'
+                    }`}
+                  >
+                    <Heart size={20} className={profile?.wishlist?.includes(selectedProduct.id) ? 'fill-current' : ''} />
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

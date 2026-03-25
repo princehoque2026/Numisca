@@ -2,6 +2,7 @@ import React from 'react';
 import { collection, query, onSnapshot, addDoc, serverTimestamp, where, orderBy, limit } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '../firebase';
 import { useAuth } from '../contexts/AuthContext';
+import { useNotifications } from '../contexts/NotificationContext';
 import { motion, AnimatePresence } from 'motion/react';
 import { Send, Hash, MessageSquare, Plus, Users, Image as ImageIcon, Search, X, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
@@ -29,6 +30,7 @@ interface Message {
 
 export const Community: React.FC = () => {
   const { user, profile } = useAuth();
+  const { sendNotification } = useNotifications();
   const [chats, setChats] = React.useState<Chat[]>([]);
   const [activeChat, setActiveChat] = React.useState<Chat | null>(null);
   const [messages, setMessages] = React.useState<Message[]>([]);
@@ -36,6 +38,7 @@ export const Community: React.FC = () => {
   const [imageFile, setImageFile] = React.useState<string | null>(null);
   const [isUploading, setIsUploading] = React.useState(false);
   const [loading, setLoading] = React.useState(true);
+  const [showSidebar, setShowSidebar] = React.useState(true);
   const scrollRef = React.useRef<HTMLDivElement>(null);
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -68,6 +71,18 @@ export const Community: React.FC = () => {
         imageUrl: msgImage || null,
         createdAt: serverTimestamp()
       });
+
+      // Notify other participants
+      const otherParticipants = activeChat.participants.filter(p => p !== user.uid);
+      for (const participantUid of otherParticipants) {
+        await sendNotification({
+          userUid: participantUid,
+          title: `New Message in ${activeChat.name}`,
+          message: `${profile?.name || 'A user'} sent a message.`,
+          type: 'info',
+          link: '/community'
+        });
+      }
     } catch (error) {
       handleFirestoreError(error, OperationType.CREATE, `chats/${activeChat.id}/messages`);
     }
@@ -131,11 +146,17 @@ export const Community: React.FC = () => {
     }
   };
 
+  React.useEffect(() => {
+    if (activeChat) {
+      setShowSidebar(false);
+    }
+  }, [activeChat]);
+
   return (
-    <div className="h-[75vh] flex curved-card overflow-hidden bg-white">
+    <div className="h-[calc(100vh-12rem)] flex curved-card overflow-hidden bg-white border border-black/5">
       {/* Sidebar */}
-      <div className="w-1/4 border-r border-gray-100 flex flex-col bg-gray-50/50">
-        <div className="p-6 border-b border-gray-100 flex justify-between items-center">
+      <div className={`${showSidebar ? 'w-full' : 'hidden'} border-r border-gray-100 flex flex-col bg-gray-50/50`}>
+        <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-white">
           <h2 className="text-[10px] uppercase tracking-[0.2em] font-bold text-gray-400">Groups</h2>
           <button 
             onClick={() => {
@@ -151,7 +172,10 @@ export const Community: React.FC = () => {
           {chats.map((chat) => (
             <button
               key={chat.id}
-              onClick={() => setActiveChat(chat)}
+              onClick={() => {
+                setActiveChat(chat);
+                setShowSidebar(false);
+              }}
               className={`w-full p-6 text-left border-b border-gray-100/50 transition-all flex items-center gap-4 ${
                 activeChat?.id === chat.id ? 'bg-black text-white shadow-lg z-10' : 'hover:bg-white'
               }`}
@@ -175,32 +199,26 @@ export const Community: React.FC = () => {
       </div>
 
       {/* Chat Area */}
-      <div className="flex-1 flex flex-col bg-white">
+      <div className={`${!showSidebar ? 'w-full' : 'hidden'} flex flex-col bg-white`}>
         {activeChat ? (
           <>
-            <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-white/80 backdrop-blur-md z-10">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-black text-white rounded-2xl flex items-center justify-center">
-                  {activeChat.type === 'group' ? <Hash size={20} /> : <Users size={20} />}
+            <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-white/80 backdrop-blur-md z-10">
+              <div className="flex items-center gap-3">
+                <button 
+                  onClick={() => setShowSidebar(true)}
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                >
+                  <X size={20} className="rotate-45" />
+                </button>
+                <div className="w-10 h-10 bg-black text-white rounded-xl flex items-center justify-center">
+                  {activeChat.type === 'group' ? <Hash size={18} /> : <Users size={18} />}
                 </div>
-                <div>
-                  <h2 className="text-2xl font-display font-bold leading-tight">{activeChat.name}</h2>
+                <div className="min-w-0">
+                  <h2 className="text-lg font-display font-bold leading-tight truncate">{activeChat.name}</h2>
                   <span className="text-[8px] uppercase tracking-[0.2em] text-gray-400 font-bold">
-                    {activeChat.type} • {activeChat.participants.length} members
+                    {activeChat.participants.length} members
                   </span>
                 </div>
-              </div>
-              <div className="flex -space-x-3">
-                {activeChat.participants.slice(0, 4).map((p, i) => (
-                  <div key={i} className="w-8 h-8 rounded-full bg-gray-100 border-2 border-white flex items-center justify-center text-[10px] font-bold text-black shadow-sm">
-                    {i + 1}
-                  </div>
-                ))}
-                {activeChat.participants.length > 4 && (
-                  <div className="w-8 h-8 rounded-full bg-black border-2 border-white flex items-center justify-center text-[10px] font-bold text-white shadow-sm">
-                    +{activeChat.participants.length - 4}
-                  </div>
-                )}
               </div>
             </div>
 

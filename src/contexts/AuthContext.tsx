@@ -6,6 +6,7 @@ import { doc, getDoc, onSnapshot, Timestamp } from 'firebase/firestore';
 interface UserProfile {
   uid: string;
   name: string;
+  username?: string;
   email: string;
   photoURL: string;
   role: 'admin' | 'collector';

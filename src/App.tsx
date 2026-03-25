@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
+import { NotificationProvider } from './contexts/NotificationContext';
 import { Layout } from './components/Layout';
 import { ProfileSetup } from './components/ProfileSetup';
 import { Home } from './pages/Home';
@@ -10,11 +11,16 @@ import { Inventory } from './pages/Inventory';
 import { Swap } from './pages/Swap';
 import { Community } from './pages/Community';
 import { Profile } from './pages/Profile';
+import { Transactions } from './pages/Transactions';
 import { AdminDashboard } from './pages/AdminDashboard';
 
 const AppContent = () => {
   const [activeTab, setActiveTab] = React.useState('home');
   const { user, loading, isSetupComplete } = useAuth();
+
+  React.useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [activeTab]);
 
   const renderContent = () => {
     if (user && !isSetupComplete) {
@@ -34,6 +40,8 @@ const AppContent = () => {
         return <Community />;
       case 'profile':
         return <Profile />;
+      case 'transactions':
+        return <Transactions />;
       case 'admin':
         return <AdminDashboard />;
       default:
@@ -80,7 +88,9 @@ export default function App() {
   return (
     <AuthProvider>
       <CartProvider>
-        <AppContent />
+        <NotificationProvider>
+          <AppContent />
+        </NotificationProvider>
       </CartProvider>
     </AuthProvider>
   );

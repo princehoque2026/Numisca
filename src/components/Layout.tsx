@@ -18,11 +18,15 @@ import {
   ShoppingCart,
   Trash2,
   Minus,
-  ArrowRight
+  ArrowRight,
+  Bell,
+  Receipt
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
-import { signInWithGoogle, logout } from '../firebase';
+import { useNotifications } from '../contexts/NotificationContext';
+import { signInWithGoogle, logout, db, handleFirestoreError, OperationType } from '../firebase';
+import { collection, addDoc, serverTimestamp, doc, updateDoc, getDoc, writeBatch } from 'firebase/firestore';
 import { SocietyChat } from './SocietyChat';
 
 interface LayoutProps {
@@ -33,9 +37,88 @@ interface LayoutProps {
 
 export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) => {
   const { user, profile, isAdmin } = useAuth();
-  const { cartItems, removeFromCart, updateQuantity, totalPrice, itemCount } = useCart();
+  const { cartItems, removeFromCart, updateQuantity, totalPrice, itemCount, clearCart } = useCart();
+  const { notifications, unreadCount, markAsRead, sendNotification } = useNotifications();
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const [isCartOpen, setIsCartOpen] = React.useState(false);
+  const [isNotificationsOpen, setIsNotificationsOpen] = React.useState(false);
+  const [isCheckingOut, setIsCheckingOut] = React.useState(false);
+
+  const handleCheckout = async () => {
+    if (!user || cartItems.length === 0) return;
+    setIsCheckingOut(true);
+    try {
+      const batch = writeBatch(db);
+      
+      // 1. Create Transaction
+      const transactionRef = doc(collection(db, 'transactions'));
+      batch.set(transactionRef, {
+        userUid: user.uid,
+        items: cartItems.map(item => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+          imageUrl: item.imageUrl
+        })),
+        totalAmount: totalPrice,
+        status: 'completed',
+        createdAt: serverTimestamp()
+      });
+
+      // 2. Update Collectibles and Add to Inventory
+      for (const item of cartItems) {
+        const collectibleRef = doc(db, 'collectibles', item.id);
+        const collectibleSnap = await getDoc(collectibleRef);
+        
+        if (collectibleSnap.exists()) {
+          const currentQty = collectibleSnap.data().quantity || 0;
+          const newQty = Math.max(0, currentQty - item.quantity);
+          batch.update(collectibleRef, { 
+            quantity: newQty,
+            status: newQty === 0 ? 'sold' : 'available'
+          });
+
+          // Add to Inventory
+          const inventoryRef = doc(collection(db, 'inventory'));
+          batch.set(inventoryRef, {
+            ownerUid: user.uid,
+            collectibleId: item.id,
+            name: item.name,
+            type: collectibleSnap.data().type,
+            country: collectibleSnap.data().country,
+            year: collectibleSnap.data().year,
+            rarity: collectibleSnap.data().rarity,
+            quantity: item.quantity,
+            source: 'purchase',
+            imageUrl: item.imageUrl,
+            description: collectibleSnap.data().description || '',
+            addedAt: serverTimestamp()
+          });
+        }
+      }
+
+      await batch.commit();
+      
+      // 3. Success Actions
+      clearCart();
+      setIsCartOpen(false);
+      await sendNotification({
+        userUid: user.uid,
+        title: 'Purchase Successful',
+        message: `You've successfully acquired ${itemCount} items for ৳${totalPrice.toFixed(2)}.`,
+        type: 'success',
+        link: 'collection'
+      });
+      alert('Purchase successful! Items added to your collection.');
+    } catch (error) {
+      console.error('Checkout failed:', error);
+      handleFirestoreError(error, OperationType.WRITE, 'checkout');
+      alert('Checkout failed. Please try again.');
+    } finally {
+      setIsCheckingOut(false);
+    }
+  };
 
   const navItems = [
     { id: 'home', label: 'Home', icon: Home },
@@ -53,7 +136,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
   return (
     <div className="min-h-screen bg-white flex flex-col">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-black border-b border-white/10 px-6 py-4 flex items-center justify-between">
+      <header className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-md z-50 bg-black border-b border-white/10 px-4 py-3 flex items-center justify-between">
         <div 
           className="flex items-center cursor-pointer group" 
           onClick={() => setActiveTab('home')}
@@ -61,87 +144,147 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
           <img 
             src="https://i.ibb.co.com/gZsH2TCN/IMG-20251013-012232.jpg" 
             alt="Numisca Logo" 
-            className="h-10 w-auto rounded-lg object-contain transition-transform group-hover:scale-105"
+            className="h-8 w-auto rounded-lg object-contain transition-transform group-hover:scale-105"
             referrerPolicy="no-referrer"
           />
         </div>
 
-        {/* Desktop Nav */}
-        <nav className="hidden md:flex items-center gap-8">
-          {navItems.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => setActiveTab(item.id)}
-              className={`text-[10px] uppercase tracking-[0.2em] font-bold transition-all relative py-2 ${
-                activeTab === item.id ? 'text-white' : 'text-gray-500 hover:text-white'
-              }`}
-            >
-              {item.label}
-              {activeTab === item.id && (
-                <motion.div 
-                  layoutId="nav-underline"
-                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-white rounded-full"
-                />
-              )}
-            </button>
-          ))}
-        </nav>
-
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           {user && (
-            <button 
-              onClick={() => setIsCartOpen(true)}
-              className="relative p-2 text-white hover:bg-white/10 rounded-xl transition-colors group"
-            >
-              <ShoppingCart size={20} />
-              {itemCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-5 h-5 bg-white text-black text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-black">
-                  {itemCount}
-                </span>
-              )}
-            </button>
+            <div className="flex items-center gap-2">
+              {/* Notifications */}
+              <div className="relative">
+                <button 
+                  onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
+                  className="p-1.5 text-white hover:bg-white/10 rounded-xl transition-colors relative"
+                >
+                  <Bell size={18} />
+                  {unreadCount > 0 && (
+                    <span className="absolute top-0.5 right-0.5 w-3.5 h-3.5 bg-red-500 text-white text-[7px] font-bold rounded-full flex items-center justify-center border border-black">
+                      {unreadCount}
+                    </span>
+                  )}
+                </button>
+
+                <AnimatePresence>
+                  {isNotificationsOpen && (
+                    <>
+                      <div 
+                        className="fixed inset-0 z-40" 
+                        onClick={() => setIsNotificationsOpen(false)} 
+                      />
+                      <motion.div 
+                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                        className="absolute top-full right-0 mt-2 w-72 bg-black border border-white/10 rounded-2xl shadow-2xl z-50 overflow-hidden"
+                      >
+                        <div className="p-3 border-b border-white/10 flex justify-between items-center">
+                          <span className="text-[8px] uppercase tracking-widest font-bold text-white">Notifications</span>
+                          <span className="text-[7px] text-gray-500 font-bold">{unreadCount} New</span>
+                        </div>
+                        <div className="max-h-80 overflow-y-auto">
+                          {notifications.length > 0 ? (
+                            notifications.map((n) => (
+                              <div 
+                                key={n.id} 
+                                onClick={() => {
+                                  markAsRead(n.id);
+                                  if (n.link) {
+                                    setActiveTab(n.link);
+                                    setIsNotificationsOpen(false);
+                                  }
+                                }}
+                                className={`p-3 border-b border-white/5 hover:bg-white/5 transition-colors cursor-pointer ${!n.read ? 'bg-white/5' : ''}`}
+                              >
+                                <div className="flex justify-between items-start mb-1">
+                                  <span className={`text-[7px] uppercase font-bold px-1.5 py-0.5 rounded-full ${
+                                    n.type === 'success' ? 'bg-green-500/20 text-green-400' :
+                                    n.type === 'error' ? 'bg-red-500/20 text-red-400' :
+                                    'bg-blue-500/20 text-blue-400'
+                                  }`}>
+                                    {n.type}
+                                  </span>
+                                  <span className="text-[7px] text-gray-500">
+                                    {n.createdAt?.seconds ? new Date(n.createdAt.seconds * 1000).toLocaleDateString() : 'Just now'}
+                                  </span>
+                                </div>
+                                <h4 className="text-[9px] font-bold text-white uppercase tracking-tight">{n.title}</h4>
+                                <p className="text-[9px] text-gray-400 mt-0.5 leading-relaxed">{n.message}</p>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="p-6 text-center">
+                              <p className="text-[9px] text-gray-500 uppercase font-bold">No notifications</p>
+                            </div>
+                          )}
+                        </div>
+                      </motion.div>
+                    </>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Cart */}
+              <button 
+                onClick={() => setIsCartOpen(true)}
+                className="relative p-1.5 text-white hover:bg-white/10 rounded-xl transition-colors"
+              >
+                <ShoppingCart size={18} />
+                {itemCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-white text-black text-[8px] font-bold rounded-full flex items-center justify-center border border-black">
+                    {itemCount}
+                  </span>
+                )}
+              </button>
+            </div>
           )}
 
           {user ? (
-            <div className="flex items-center gap-4">
-              <div className="hidden md:flex flex-col items-end">
-                <span className="text-[10px] uppercase tracking-tighter font-bold text-white">{profile?.name}</span>
-                <span className="text-[8px] uppercase text-gray-500 font-bold">{profile?.role}</span>
-              </div>
+            <div className="flex items-center gap-3">
               <div className="relative group">
                 <img 
                   src={profile?.photoURL || user.photoURL || ''} 
                   alt="Profile" 
-                  className="w-10 h-10 rounded-xl border border-white/10 transition-transform group-hover:scale-105"
+                  className="w-8 h-8 rounded-lg border border-white/10 transition-transform group-hover:scale-105"
                   referrerPolicy="no-referrer"
                 />
-                <div className="absolute top-full right-0 mt-2 w-48 bg-black border border-white/10 rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all p-2">
+                <div className="absolute top-full right-0 mt-2 w-40 bg-black border border-white/10 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all p-1.5 z-50">
                   <button 
                     onClick={() => setActiveTab('profile')}
-                    className="w-full text-left px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-white hover:bg-white/10 rounded-xl transition-colors"
+                    className="w-full text-left px-3 py-1.5 text-[9px] font-bold uppercase tracking-widest text-white hover:bg-white/10 rounded-lg transition-colors flex items-center gap-2"
                   >
+                    <User size={12} />
                     Settings
                   </button>
                   <button 
-                    onClick={logout}
-                    className="w-full text-left px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-red-400 hover:bg-red-400/10 rounded-xl transition-colors"
+                    onClick={() => setActiveTab('transactions')}
+                    className="w-full text-left px-3 py-1.5 text-[9px] font-bold uppercase tracking-widest text-white hover:bg-white/10 rounded-lg transition-colors flex items-center gap-2"
                   >
+                    <Receipt size={12} />
+                    History
+                  </button>
+                  <button 
+                    onClick={logout}
+                    className="w-full text-left px-3 py-1.5 text-[9px] font-bold uppercase tracking-widest text-red-400 hover:bg-red-400/10 rounded-lg transition-colors flex items-center gap-2"
+                  >
+                    <LogOut size={12} />
                     Logout
                   </button>
                 </div>
               </div>
             </div>
           ) : (
-            <button onClick={signInWithGoogle} className="btn-pill bg-white text-black hover:bg-gray-200">
+            <button onClick={signInWithGoogle} className="px-4 py-1.5 bg-white text-black rounded-full text-[9px] font-bold uppercase tracking-widest hover:bg-gray-200 transition-colors">
               Login
             </button>
           )}
           
           <button 
-            className="md:hidden p-2 text-white hover:bg-white/10 rounded-xl transition-colors"
+            className="p-1.5 text-white hover:bg-white/10 rounded-xl transition-colors"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
-            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
       </header>
@@ -153,9 +296,9 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed inset-0 z-40 bg-black pt-24 px-6 md:hidden"
+            className="fixed inset-0 z-40 bg-black pt-20 px-6 max-w-md mx-auto"
           >
-            <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-4">
               {navItems.map((item) => (
                 <button
                   key={item.id}
@@ -163,7 +306,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                     setActiveTab(item.id);
                     setIsMenuOpen(false);
                   }}
-                  className={`text-2xl font-display font-bold uppercase tracking-tighter text-left ${
+                  className={`text-xl font-display font-bold uppercase tracking-tighter text-left py-2 border-b border-white/5 ${
                     activeTab === item.id ? 'text-white' : 'text-gray-500'
                   }`}
                 >
@@ -171,7 +314,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                 </button>
               ))}
               {!user && (
-                <button onClick={signInWithGoogle} className="btn-pill bg-white text-black w-full py-4 text-lg">
+                <button onClick={signInWithGoogle} className="btn-pill bg-white text-black w-full py-3 text-sm mt-4">
                   Login with Google
                 </button>
               )}
@@ -181,45 +324,45 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
       </AnimatePresence>
 
       {/* Main Content */}
-      <main className="flex-1 pt-24 pb-12 px-6 max-w-7xl mx-auto w-full">
+      <main className="flex-1 pt-20 pb-10 px-4 max-w-md mx-auto w-full border-x border-gray-50 min-h-screen bg-white">
         {children}
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-black/5 py-12 px-6">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
-          <div className="col-span-1 md:col-span-2">
+      <footer className="border-t border-black/5 py-8 px-4 max-w-md mx-auto w-full bg-gray-50">
+        <div className="grid grid-cols-1 gap-6">
+          <div>
             <img 
               src="https://i.ibb.co.com/gZsH2TCN/IMG-20251013-012232.jpg" 
               alt="Numisca Logo" 
-              className="h-12 w-auto rounded-lg object-contain mb-4 grayscale"
+              className="h-8 w-auto rounded-lg object-contain mb-3 grayscale"
               referrerPolicy="no-referrer"
             />
-            <p className="mt-4 text-gray-500 text-sm max-w-xs">
-              The premier digital ecosystem for collectors. Buy, swap, and manage your treasures with elegance and security.
+            <p className="text-gray-500 text-[10px] font-medium">
+              The premier digital ecosystem for collectors.
             </p>
           </div>
-          <div>
-            <h4 className="text-xs uppercase tracking-widest font-bold mb-4">Platform</h4>
-            <ul className="space-y-2 text-sm text-gray-500">
-              <li>Shop</li>
-              <li>Swap Escrow</li>
-              <li>Community</li>
-              <li>Security</li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="text-xs uppercase tracking-widest font-bold mb-4">Legal</h4>
-            <ul className="space-y-2 text-sm text-gray-500">
-              <li>Privacy Policy</li>
-              <li>Terms of Service</li>
-              <li>Cookie Policy</li>
-            </ul>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <h4 className="text-[7px] uppercase tracking-widest font-bold mb-1.5">Platform</h4>
+              <ul className="space-y-1 text-[9px] text-gray-500 font-medium">
+                <li>Shop</li>
+                <li>Swap</li>
+                <li>Community</li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-[7px] uppercase tracking-widest font-bold mb-1.5">Legal</h4>
+              <ul className="space-y-1 text-[9px] text-gray-500 font-medium">
+                <li>Privacy</li>
+                <li>Terms</li>
+              </ul>
+            </div>
           </div>
         </div>
-        <div className="max-w-7xl mx-auto mt-12 pt-8 border-t border-black/5 flex justify-between items-center text-[10px] uppercase tracking-widest text-gray-400">
-          <span>© 2026 Numisca. All rights reserved.</span>
-          <div className="flex gap-6">
+        <div className="mt-6 pt-4 border-t border-black/5 flex flex-col gap-2 text-[7px] uppercase tracking-widest text-gray-400 font-bold">
+          <span>© 2026 Numisca.</span>
+          <div className="flex gap-4">
             <span>Twitter</span>
             <span>Instagram</span>
             <span>Discord</span>
@@ -244,24 +387,24 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
               className="relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col"
             >
-              <div className="p-8 bg-black text-white flex justify-between items-center">
-                <div className="flex items-center gap-3">
-                  <ShoppingCart size={24} />
-                  <h2 className="text-2xl font-display font-bold">Your Cart</h2>
+              <div className="p-6 bg-black text-white flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <ShoppingCart size={20} />
+                  <h2 className="text-xl font-display font-bold">Your Cart</h2>
                 </div>
                 <button 
                   onClick={() => setIsCartOpen(false)}
-                  className="p-2 hover:bg-white/10 rounded-full transition-colors"
+                  className="p-1.5 hover:bg-white/10 rounded-full transition-colors"
                 >
-                  <X size={24} />
+                  <X size={20} />
                 </button>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-8 space-y-6">
+              <div className="flex-1 overflow-y-auto p-6 space-y-4">
                 {cartItems.length > 0 ? (
                   cartItems.map((item) => (
-                    <div key={item.id} className="flex gap-4 group">
-                      <div className="w-20 h-20 bg-gray-50 rounded-2xl overflow-hidden flex-shrink-0">
+                    <div key={item.id} className="flex gap-3 group">
+                      <div className="w-16 h-16 bg-gray-50 rounded-xl overflow-hidden flex-shrink-0">
                         <img 
                           src={item.imageUrl || `https://picsum.photos/seed/${item.id}/200/200`} 
                           alt={item.name}
@@ -269,54 +412,64 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                           referrerPolicy="no-referrer"
                         />
                       </div>
-                      <div className="flex-1 space-y-1">
-                        <h4 className="font-bold uppercase tracking-widest text-sm">{item.name}</h4>
-                        <p className="text-xs text-gray-400 font-bold">${item.price}</p>
-                        <div className="flex items-center gap-3 mt-2">
+                      <div className="flex-1 min-w-0 space-y-0.5">
+                        <h4 className="font-bold uppercase tracking-widest text-[10px] truncate">{item.name}</h4>
+                        <p className="text-[10px] text-gray-400 font-bold">৳{item.price}</p>
+                        <div className="flex items-center gap-2 mt-1">
                           <button 
                             onClick={() => updateQuantity(item.id, item.quantity - 1)}
                             className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
                           >
-                            <Minus size={14} />
+                            <Minus size={12} />
                           </button>
-                          <span className="text-xs font-bold">{item.quantity}</span>
+                          <span className="text-[10px] font-bold">{item.quantity}</span>
                           <button 
                             onClick={() => updateQuantity(item.id, item.quantity + 1)}
                             className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
                           >
-                            <Plus size={14} />
+                            <Plus size={12} />
                           </button>
                         </div>
                       </div>
                       <button 
                         onClick={() => removeFromCart(item.id)}
-                        className="p-2 text-gray-300 hover:text-red-500 transition-colors self-start"
+                        className="p-1.5 text-gray-300 hover:text-red-500 transition-colors self-start"
                       >
-                        <Trash2 size={16} />
+                        <Trash2 size={14} />
                       </button>
                     </div>
                   ))
                 ) : (
-                  <div className="h-full flex flex-col items-center justify-center text-center space-y-4">
-                    <div className="w-20 h-20 bg-gray-50 rounded-3xl flex items-center justify-center text-gray-200">
-                      <ShoppingCart size={40} />
+                  <div className="h-full flex flex-col items-center justify-center text-center space-y-3">
+                    <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-200">
+                      <ShoppingCart size={32} />
                     </div>
                     <div>
-                      <h3 className="text-xl font-display font-bold">Empty Cart</h3>
-                      <p className="text-sm text-gray-400">Your archives are waiting for treasures.</p>
+                      <h3 className="text-lg font-display font-bold">Empty Cart</h3>
+                      <p className="text-xs text-gray-400">Your archives are waiting.</p>
                     </div>
                   </div>
                 )}
               </div>
 
               {cartItems.length > 0 && (
-                <div className="p-8 border-t border-black/5 space-y-6">
+                <div className="p-6 border-t border-black/5 space-y-4">
                   <div className="flex justify-between items-end">
-                    <span className="text-xs uppercase tracking-widest font-bold text-gray-400">Total Amount</span>
-                    <span className="text-3xl font-display font-bold">${totalPrice.toFixed(2)}</span>
+                    <span className="text-[8px] uppercase tracking-widest font-bold text-gray-400">Total Amount</span>
+                    <span className="text-2xl font-display font-bold">৳{totalPrice.toFixed(2)}</span>
                   </div>
-                  <button className="btn-pill w-full flex items-center justify-center gap-2 group">
-                    Checkout Now <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                  <button 
+                    onClick={handleCheckout}
+                    disabled={isCheckingOut}
+                    className="btn-pill w-full flex items-center justify-center gap-2 py-3.5 text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isCheckingOut ? (
+                      <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <>
+                        Checkout Now <ArrowRight size={14} />
+                      </>
+                    )}
                   </button>
                 </div>
               )}
