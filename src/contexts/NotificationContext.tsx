@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { collection, query, where, onSnapshot, addDoc, serverTimestamp, updateDoc, doc, deleteDoc, orderBy } from 'firebase/firestore';
-import { db, handleFirestoreError, OperationType } from '../firebase';
+import { collection, query, where, onSnapshot, addDoc, serverTimestamp, updateDoc, doc, deleteDoc, orderBy, arrayUnion } from 'firebase/firestore';
+import { db, handleFirestoreError, OperationType, messaging } from '../firebase';
+import { getToken, onMessage } from 'firebase/messaging';
 import { useAuth } from './AuthContext';
 
 export interface Notification {
@@ -25,9 +26,11 @@ interface SendNotificationParams {
 interface NotificationContextType {
   notifications: Notification[];
   unreadCount: number;
+  permissionStatus: NotificationPermission;
   markAsRead: (id: string) => Promise<void>;
   deleteNotification: (id: string) => Promise<void>;
   sendNotification: (params: SendNotificationParams) => Promise<void>;
+  requestPushPermission: () => Promise<void>;
 }
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
@@ -35,6 +38,9 @@ const NotificationContext = createContext<NotificationContextType | undefined>(u
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [permissionStatus, setPermissionStatus] = useState<NotificationPermission>(
+    typeof Notification !== 'undefined' ? Notification.permission : 'default'
+  );
 
   useEffect(() => {
     if (!user) {
@@ -55,8 +61,53 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       handleFirestoreError(error, OperationType.LIST, 'notifications');
     });
 
-    return unsubscribe;
+    // Handle foreground messages
+    if (messaging) {
+      const unsubscribeMessage = onMessage(messaging, (payload) => {
+        console.log('Foreground message received:', payload);
+        // Add to local notifications if not already there
+        if (payload.notification) {
+          const newNotif: Notification = {
+            id: Date.now().toString(),
+            userUid: user.uid,
+            title: payload.notification.title || 'Notification',
+            message: payload.notification.body || '',
+            type: 'info',
+            read: false,
+            createdAt: new Date(),
+            link: payload.data?.link
+          };
+          setNotifications(prev => [newNotif, ...prev]);
+        }
+      });
+      return () => {
+        unsubscribe();
+        unsubscribeMessage();
+      };
+    }
+
+    return () => unsubscribe();
   }, [user]);
+
+  const requestPushPermission = async () => {
+    if (!user || typeof Notification === 'undefined') return;
+    try {
+      const permission = await Notification.requestPermission();
+      setPermissionStatus(permission);
+      if (permission === 'granted') {
+        const token = await getToken(messaging, {
+          vapidKey: import.meta.env.VITE_VAPID_KEY || 'BOnnceIY77oWnqzqJjlYHTM5uF8s9cshBDyaLEA1Lw_L7Ii5lxMq_rZlYYRbEvid_MtIE2qU9A4SK5KVwMkbU3g'
+        });
+        if (token) {
+          await updateDoc(doc(db, 'users', user.uid), {
+            fcmTokens: arrayUnion(token)
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Push permission error:', error);
+    }
+  };
 
   const markAsRead = async (id: string) => {
     try {
@@ -96,9 +147,11 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     <NotificationContext.Provider value={{ 
       notifications, 
       unreadCount, 
+      permissionStatus,
       markAsRead, 
       deleteNotification, 
-      sendNotification 
+      sendNotification,
+      requestPushPermission
     }}>
       {children}
     </NotificationContext.Provider>

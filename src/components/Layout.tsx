@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Home, 
@@ -20,14 +20,16 @@ import {
   Minus,
   ArrowRight,
   Bell,
-  Receipt
+  Receipt,
+  Moon,
+  Sun
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 import { useNotifications } from '../contexts/NotificationContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { signInWithGoogle, logout, db, handleFirestoreError, OperationType } from '../firebase';
 import { collection, addDoc, serverTimestamp, doc, updateDoc, getDoc, writeBatch } from 'firebase/firestore';
-import { SocietyChat } from './SocietyChat';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -39,10 +41,11 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
   const { user, profile, isAdmin } = useAuth();
   const { cartItems, removeFromCart, updateQuantity, totalPrice, itemCount, clearCart } = useCart();
   const { notifications, unreadCount, markAsRead, sendNotification } = useNotifications();
-  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
-  const [isCartOpen, setIsCartOpen] = React.useState(false);
-  const [isNotificationsOpen, setIsNotificationsOpen] = React.useState(false);
-  const [isCheckingOut, setIsCheckingOut] = React.useState(false);
+  const { theme, toggleTheme } = useTheme();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
 
   const handleCheckout = async () => {
     if (!user || cartItems.length === 0) return;
@@ -134,9 +137,9 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
   }
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-white dark:bg-zinc-950 flex flex-col transition-colors duration-300">
       {/* Header */}
-      <header className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-md z-50 bg-black border-b border-white/10 px-4 py-3 flex items-center justify-between">
+      <header className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-md z-50 bg-black dark:bg-black border-b border-white/10 px-4 py-3 flex items-center justify-between">
         <div 
           className="flex items-center cursor-pointer group" 
           onClick={() => setActiveTab('home')}
@@ -152,6 +155,15 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
         <div className="flex items-center gap-3">
           {user && (
             <div className="flex items-center gap-2">
+              {/* Theme Toggle */}
+              <button 
+                onClick={toggleTheme}
+                className="p-1.5 text-white hover:bg-white/10 rounded-xl transition-colors"
+                title={theme === 'dark' ? 'Switch to Light' : 'Switch to Dark'}
+              >
+                {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+              </button>
+
               {/* Notifications */}
               <div className="relative">
                 <button 
@@ -324,12 +336,12 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
       </AnimatePresence>
 
       {/* Main Content */}
-      <main className="flex-1 pt-20 pb-10 px-4 max-w-md mx-auto w-full border-x border-gray-50 min-h-screen bg-white">
+      <main className="flex-1 pt-20 pb-10 px-4 max-w-md mx-auto w-full border-x border-gray-50 dark:border-zinc-900 min-h-screen bg-white dark:bg-zinc-950">
         {children}
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-black/5 py-8 px-4 max-w-md mx-auto w-full bg-gray-50">
+      <footer className="border-t border-black/5 dark:border-white/5 py-8 px-4 max-w-md mx-auto w-full bg-gray-50 dark:bg-zinc-900/50">
         <div className="grid grid-cols-1 gap-6">
           <div>
             <img 
@@ -338,29 +350,29 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
               className="h-8 w-auto rounded-lg object-contain mb-3 grayscale"
               referrerPolicy="no-referrer"
             />
-            <p className="text-gray-500 text-[10px] font-medium">
+            <p className="text-gray-500 dark:text-zinc-400 text-[10px] font-medium">
               The premier digital ecosystem for collectors.
             </p>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <h4 className="text-[7px] uppercase tracking-widest font-bold mb-1.5">Platform</h4>
-              <ul className="space-y-1 text-[9px] text-gray-500 font-medium">
+              <h4 className="text-[7px] uppercase tracking-widest font-bold mb-1.5 dark:text-zinc-300">Platform</h4>
+              <ul className="space-y-1 text-[9px] text-gray-500 dark:text-zinc-400 font-medium">
                 <li>Shop</li>
                 <li>Swap</li>
                 <li>Community</li>
               </ul>
             </div>
             <div>
-              <h4 className="text-[7px] uppercase tracking-widest font-bold mb-1.5">Legal</h4>
-              <ul className="space-y-1 text-[9px] text-gray-500 font-medium">
+              <h4 className="text-[7px] uppercase tracking-widest font-bold mb-1.5 dark:text-zinc-300">Legal</h4>
+              <ul className="space-y-1 text-[9px] text-gray-500 dark:text-zinc-400 font-medium">
                 <li>Privacy</li>
                 <li>Terms</li>
               </ul>
             </div>
           </div>
         </div>
-        <div className="mt-6 pt-4 border-t border-black/5 flex flex-col gap-2 text-[7px] uppercase tracking-widest text-gray-400 font-bold">
+        <div className="mt-6 pt-4 border-t border-black/5 dark:border-white/5 flex flex-col gap-2 text-[7px] uppercase tracking-widest text-gray-400 dark:text-zinc-500 font-bold">
           <span>© 2026 Numisca.</span>
           <div className="flex gap-4">
             <span>Twitter</span>
@@ -399,12 +411,11 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                   <X size={20} />
                 </button>
               </div>
-
               <div className="flex-1 overflow-y-auto p-6 space-y-4">
                 {cartItems.length > 0 ? (
                   cartItems.map((item) => (
                     <div key={item.id} className="flex gap-3 group">
-                      <div className="w-16 h-16 bg-gray-50 rounded-xl overflow-hidden flex-shrink-0">
+                      <div className="w-16 h-16 bg-gray-50 dark:bg-zinc-900 rounded-xl overflow-hidden flex-shrink-0">
                         <img 
                           src={item.imageUrl || `https://picsum.photos/seed/${item.id}/200/200`} 
                           alt={item.name}
@@ -413,19 +424,19 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                         />
                       </div>
                       <div className="flex-1 min-w-0 space-y-0.5">
-                        <h4 className="font-bold uppercase tracking-widest text-[10px] truncate">{item.name}</h4>
+                        <h4 className="font-bold uppercase tracking-widest text-[10px] truncate dark:text-white">{item.name}</h4>
                         <p className="text-[10px] text-gray-400 font-bold">৳{item.price}</p>
                         <div className="flex items-center gap-2 mt-1">
                           <button 
                             onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                            className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+                            className="p-1 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-lg transition-colors text-black dark:text-white"
                           >
                             <Minus size={12} />
                           </button>
-                          <span className="text-[10px] font-bold">{item.quantity}</span>
+                          <span className="text-[10px] font-bold dark:text-white">{item.quantity}</span>
                           <button 
                             onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                            className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+                            className="p-1 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-lg transition-colors text-black dark:text-white"
                           >
                             <Plus size={12} />
                           </button>
@@ -441,11 +452,11 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                   ))
                 ) : (
                   <div className="h-full flex flex-col items-center justify-center text-center space-y-3">
-                    <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-200">
+                    <div className="w-16 h-16 bg-gray-50 dark:bg-zinc-900 rounded-2xl flex items-center justify-center text-gray-200 dark:text-zinc-700">
                       <ShoppingCart size={32} />
                     </div>
                     <div>
-                      <h3 className="text-lg font-display font-bold">Empty Cart</h3>
+                      <h3 className="text-lg font-display font-bold dark:text-white">Empty Cart</h3>
                       <p className="text-xs text-gray-400">Your archives are waiting.</p>
                     </div>
                   </div>
@@ -453,18 +464,18 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
               </div>
 
               {cartItems.length > 0 && (
-                <div className="p-6 border-t border-black/5 space-y-4">
+                <div className="p-6 border-t border-black/5 dark:border-white/5 space-y-4">
                   <div className="flex justify-between items-end">
                     <span className="text-[8px] uppercase tracking-widest font-bold text-gray-400">Total Amount</span>
-                    <span className="text-2xl font-display font-bold">৳{totalPrice.toFixed(2)}</span>
+                    <span className="text-2xl font-display font-bold dark:text-white">৳{totalPrice.toFixed(2)}</span>
                   </div>
                   <button 
                     onClick={handleCheckout}
                     disabled={isCheckingOut}
-                    className="btn-pill w-full flex items-center justify-center gap-2 py-3.5 text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="btn-pill bg-black dark:bg-white dark:text-black w-full flex items-center justify-center gap-2 py-3.5 text-xs disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isCheckingOut ? (
-                      <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                      <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
                     ) : (
                       <>
                         Checkout Now <ArrowRight size={14} />
@@ -477,8 +488,6 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
           </div>
         )}
       </AnimatePresence>
-
-      <SocietyChat />
     </div>
   );
 };

@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
 import { NotificationProvider } from './contexts/NotificationContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import { Layout } from './components/Layout';
 import { ProfileSetup } from './components/ProfileSetup';
 import { Home } from './pages/Home';
@@ -15,10 +16,10 @@ import { Transactions } from './pages/Transactions';
 import { AdminDashboard } from './pages/AdminDashboard';
 
 const AppContent = () => {
-  const [activeTab, setActiveTab] = React.useState('home');
+  const [activeTab, setActiveTab] = useState('home');
   const { user, loading, isSetupComplete } = useAuth();
 
-  React.useEffect(() => {
+  useEffect(() => {
     window.scrollTo(0, 0);
   }, [activeTab]);
 
@@ -86,12 +87,14 @@ const AppContent = () => {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <CartProvider>
-        <NotificationProvider>
-          <AppContent />
-        </NotificationProvider>
-      </CartProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <CartProvider>
+          <NotificationProvider>
+            <AppContent />
+          </NotificationProvider>
+        </CartProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }

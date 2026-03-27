@@ -1,11 +1,15 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
-import { getFirestore, doc, getDoc, setDoc, collection, query, where, onSnapshot, addDoc, updateDoc, deleteDoc, Timestamp, serverTimestamp } from 'firebase/firestore';
+import { getFirestore, doc, getDoc, setDoc, collection, query, where, onSnapshot, addDoc, updateDoc, deleteDoc, Timestamp, serverTimestamp, arrayUnion } from 'firebase/firestore';
+import { getMessaging, getToken, onMessage } from 'firebase/messaging';
+import { getAnalytics } from 'firebase/analytics';
 import firebaseConfig from '../firebase-applet-config.json';
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+export const messaging = getMessaging(app);
+export const analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;
 export const googleProvider = new GoogleAuthProvider();
 
 export const signInWithGoogle = async () => {
@@ -16,7 +20,7 @@ export const signInWithGoogle = async () => {
     // Check if user exists in Firestore, if not create profile
     const userDoc = await getDoc(doc(db, 'users', user.uid));
     if (!userDoc.exists()) {
-      const isAdminEmail = user.email === 'princehoque2025@gmail.com';
+      const isAdminEmail = user.email === 'historyancient475@gmail.com';
       await setDoc(doc(db, 'users', user.uid), {
         uid: user.uid,
         name: user.displayName || 'Collector',
@@ -29,8 +33,16 @@ export const signInWithGoogle = async () => {
       });
     }
     return user;
-  } catch (error) {
-    console.error("Error signing in with Google", error);
+  } catch (error: any) {
+    if (error.code === 'auth/configuration-not-found') {
+      console.error("Firebase Auth Error: Google provider is not enabled in the Firebase Console.");
+      alert("Authentication Error: Please ensure Google Sign-In is enabled in your Firebase Console.");
+    } else if (error.code === 'auth/unauthorized-domain') {
+      console.error("Firebase Auth Error: This domain is not authorized for authentication.");
+      alert("Authentication Error: This domain is not authorized. Please add the current URL to 'Authorized domains' in your Firebase Console (Authentication > Settings > Authorized domains).");
+    } else {
+      console.error("Error signing in with Google", error);
+    }
     throw error;
   }
 };

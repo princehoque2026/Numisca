@@ -34,11 +34,13 @@ import {
   ShieldCheck,
   Camera,
   Save,
-  Loader2
+  Loader2,
+  Bell
 } from 'lucide-react';
 import { format } from 'date-fns';
 import Cropper from 'react-easy-crop';
 import { WorldMap } from '../components/WorldMap';
+import { useNotifications } from '../contexts/NotificationContext';
 import { 
   PieChart, 
   Pie, 
@@ -61,6 +63,7 @@ interface WishlistItem {
 
 export const Profile: React.FC = () => {
   const { user, profile, loading: authLoading } = useAuth();
+  const { requestPushPermission, permissionStatus } = useNotifications();
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({
     name: '',
@@ -406,6 +409,15 @@ export const Profile: React.FC = () => {
             >
               <Settings size={14} /> Edit Profile
             </button>
+
+            {permissionStatus !== 'granted' && (
+              <button 
+                onClick={requestPushPermission}
+                className="btn-pill-outline w-full flex items-center justify-center gap-2 border-orange-200 text-orange-600 hover:bg-orange-50 text-xs py-3"
+              >
+                <Bell size={14} /> Enable Push Notifications
+              </button>
+            )}
             
             {profile?.verificationStatus === 'none' && (
               <button 
