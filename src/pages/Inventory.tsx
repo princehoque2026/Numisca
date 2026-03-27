@@ -159,21 +159,21 @@ export const Inventory: React.FC = () => {
     <div className="space-y-12">
       <div className="flex flex-col gap-4">
         <div>
-          <h1 className="text-3xl font-display font-bold">My Collection</h1>
-          <p className="text-xs text-gray-500 mt-1 font-medium">Manage and visualize your personal inventory.</p>
+          <h1 className="text-3xl font-display font-bold text-zinc-900 dark:text-zinc-50">My Collection</h1>
+          <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 font-medium">Manage and visualize your personal inventory.</p>
         </div>
         
         <div className="flex items-center justify-between gap-4">
-          <div className="flex border border-black p-1 rounded-xl overflow-hidden bg-white">
+          <div className="flex border border-zinc-900 dark:border-zinc-100 p-1 rounded-xl overflow-hidden bg-white dark:bg-zinc-900">
             <button 
               onClick={() => setView('grid')}
-              className={`p-2 transition-all ${view === 'grid' ? 'bg-black text-white' : 'hover:bg-gray-100'}`}
+              className={`p-2 transition-all ${view === 'grid' ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900' : 'text-zinc-400 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}
             >
               <Filter size={14} />
             </button>
             <button 
               onClick={() => setView('stats')}
-              className={`p-2 transition-all ${view === 'stats' ? 'bg-black text-white' : 'hover:bg-gray-100'}`}
+              className={`p-2 transition-all ${view === 'stats' ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900' : 'text-zinc-400 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}
             >
               <ChartIcon size={14} />
             </button>
@@ -188,13 +188,13 @@ export const Inventory: React.FC = () => {
       </div>
 
       {view === 'grid' && (
-        <div className="flex flex-col gap-3 bg-gray-50 p-4 rounded-[1.5rem] border border-black/5">
+        <div className="flex flex-col gap-3 bg-zinc-50 dark:bg-zinc-900/50 p-4 rounded-[1.5rem] border border-zinc-200 dark:border-zinc-800">
           <div className="relative w-full">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500" size={14} />
             <input 
               type="text" 
               placeholder="Search..." 
-              className="input-field pl-10 bg-white text-sm py-2.5"
+              className="input-field pl-10 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 border-zinc-200 dark:border-zinc-800 text-sm py-2.5"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -202,7 +202,7 @@ export const Inventory: React.FC = () => {
           
           <div className="grid grid-cols-2 gap-2 w-full">
             <select 
-              className="input-field py-2 text-[10px] bg-white"
+              className="input-field py-2 text-[10px] bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100"
               value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
             >
@@ -215,7 +215,7 @@ export const Inventory: React.FC = () => {
             </select>
 
             <select 
-              className="input-field py-2 text-[10px] bg-white"
+              className="input-field py-2 text-[10px] bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100"
               value={filterRarity}
               onChange={(e) => setFilterRarity(e.target.value)}
             >
@@ -227,7 +227,7 @@ export const Inventory: React.FC = () => {
             </select>
 
             <select 
-              className="input-field py-2 text-[10px] bg-white col-span-2"
+              className="input-field py-2 text-[10px] bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 col-span-2"
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
             >
@@ -241,8 +241,8 @@ export const Inventory: React.FC = () => {
 
       {view === 'stats' ? (
         <div className="grid grid-cols-1 gap-6">
-          <div className="card-curved p-6">
-            <h3 className="text-[10px] uppercase tracking-widest font-bold mb-6">Distribution by Type</h3>
+          <div className="card-curved p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+            <h3 className="text-[10px] uppercase tracking-widest font-bold mb-6 text-zinc-900 dark:text-zinc-50">Distribution by Type</h3>
             <div className="h-48">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -260,7 +260,7 @@ export const Inventory: React.FC = () => {
                     ))}
                   </Pie>
                   <Tooltip 
-                    contentStyle={{ borderRadius: '1rem', border: 'none', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', fontSize: '10px' }}
+                    contentStyle={{ borderRadius: '1rem', border: 'none', backgroundColor: '#18181b', color: '#f4f4f5', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', fontSize: '10px' }}
                   />
                 </PieChart>
               </ResponsiveContainer>
@@ -269,14 +269,14 @@ export const Inventory: React.FC = () => {
               {typeData.map((d, i) => (
                 <div key={d.name} className="flex items-center gap-1.5">
                   <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
-                  <span className="text-[8px] uppercase tracking-tighter font-bold truncate">{d.name} ({d.value})</span>
+                  <span className="text-[8px] uppercase tracking-tighter font-bold truncate text-zinc-900 dark:text-zinc-50">{d.name} ({d.value})</span>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="card-curved p-6">
-            <h3 className="text-[10px] uppercase tracking-widest font-bold mb-6">Top Countries</h3>
+          <div className="card-curved p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+            <h3 className="text-[10px] uppercase tracking-widest font-bold mb-6 text-zinc-900 dark:text-zinc-50">Top Countries</h3>
             <div className="h-48">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={countryData} layout="vertical">
@@ -287,13 +287,13 @@ export const Inventory: React.FC = () => {
                     width={80} 
                     axisLine={false} 
                     tickLine={false} 
-                    className="text-[8px] uppercase font-bold" 
+                    className="text-[8px] uppercase font-bold text-zinc-900 dark:text-zinc-50" 
                   />
                   <Tooltip 
                     cursor={{ fill: 'transparent' }}
-                    contentStyle={{ borderRadius: '1rem', border: 'none', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', fontSize: '10px' }}
+                    contentStyle={{ borderRadius: '1rem', border: 'none', backgroundColor: '#18181b', color: '#f4f4f5', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', fontSize: '10px' }}
                   />
-                  <Bar dataKey="value" fill="#000000" radius={[0, 10, 10, 0]} barSize={15} />
+                  <Bar dataKey="value" fill="#71717a" radius={[0, 10, 10, 0]} barSize={15} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -306,40 +306,40 @@ export const Inventory: React.FC = () => {
               key={item.id}
               layout
               whileHover={{ y: -5 }}
-              className="group card-curved p-3 bg-white hover:shadow-xl transition-all duration-500 border border-black/5"
+              className="group card-curved p-3 bg-white dark:bg-zinc-900 hover:shadow-xl transition-all duration-500 border border-zinc-200 dark:border-zinc-800"
             >
               <div 
-                className="aspect-square bg-gray-50 rounded-xl flex items-center justify-center mb-3 relative overflow-hidden cursor-pointer"
+                className="aspect-square bg-zinc-50 dark:bg-zinc-800 rounded-xl flex items-center justify-center mb-3 relative overflow-hidden cursor-pointer"
                 onClick={() => setSelectedItem(item)}
               >
                 {item.imageUrl ? (
                   <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                 ) : (
-                  <Globe className="text-gray-200" size={32} />
+                  <Globe className="text-zinc-200 dark:text-zinc-700" size={32} />
                 )}
                 <div className="absolute top-2 left-2">
                   <span className={`text-[6px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full border ${
                     item.rarity === 'legendary' ? 'bg-yellow-400 text-black border-yellow-400' :
-                    item.rarity === 'rare' ? 'bg-black text-white border-black' : 'bg-white text-black border-gray-100'
+                    item.rarity === 'rare' ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 border-zinc-900 dark:border-zinc-100' : 'bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 border-zinc-100 dark:border-zinc-800'
                   }`}>
                     {item.rarity}
                   </span>
                 </div>
                 <button 
                   onClick={(e) => { e.stopPropagation(); handleDeleteItem(item.id); }}
-                  className="absolute top-2 right-2 p-1.5 bg-white/80 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:text-red-500 shadow-sm"
+                  className="absolute top-2 right-2 p-1.5 bg-white/80 dark:bg-zinc-800/80 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:text-red-500 shadow-sm text-zinc-900 dark:text-zinc-100"
                 >
                   <Trash2 size={12} />
                 </button>
               </div>
               <div className="space-y-0.5">
-                <h3 className="font-display font-bold text-xs leading-tight truncate">{item.name}</h3>
+                <h3 className="font-display font-bold text-xs leading-tight truncate text-zinc-900 dark:text-zinc-50">{item.name}</h3>
                 <div className="flex items-center gap-1">
-                  <p className="text-[7px] text-gray-400 uppercase tracking-widest font-bold truncate max-w-[40px]">
+                  <p className="text-[7px] text-zinc-500 dark:text-zinc-400 uppercase tracking-widest font-bold truncate max-w-[40px]">
                     {item.country}
                   </p>
-                  <span className="w-0.5 h-0.5 bg-gray-200 rounded-full" />
-                  <p className="text-[7px] text-gray-400 uppercase tracking-widest font-bold">
+                  <span className="w-0.5 h-0.5 bg-zinc-200 dark:bg-zinc-800 rounded-full" />
+                  <p className="text-[7px] text-zinc-500 dark:text-zinc-400 uppercase tracking-widest font-bold">
                     {item.year}
                   </p>
                 </div>
@@ -364,11 +364,11 @@ export const Inventory: React.FC = () => {
           <motion.div 
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white p-10 rounded-[2.5rem] max-w-2xl w-full shadow-2xl"
+            className="bg-white dark:bg-zinc-900 p-10 rounded-[2.5rem] max-w-2xl w-full shadow-2xl border border-zinc-200 dark:border-zinc-800"
           >
             <div className="flex justify-between items-center mb-10">
-              <h2 className="text-4xl font-display font-bold">Add to Collection</h2>
-              <button onClick={() => setIsAdding(false)} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+              <h2 className="text-4xl font-display font-bold text-zinc-900 dark:text-zinc-50">Add to Collection</h2>
+              <button onClick={() => setIsAdding(false)} className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full transition-colors text-zinc-900 dark:text-zinc-100">
                 <Plus size={24} className="rotate-45" />
               </button>
             </div>
@@ -491,16 +491,16 @@ export const Inventory: React.FC = () => {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="bg-white max-w-5xl w-full rounded-[3rem] shadow-2xl overflow-y-auto flex flex-col relative max-h-[90vh]"
+              className="bg-white dark:bg-zinc-900 max-w-5xl w-full rounded-[3rem] shadow-2xl overflow-y-auto flex flex-col relative max-h-[90vh] border border-zinc-200 dark:border-zinc-800"
             >
               <button 
                 onClick={() => setSelectedItem(null)}
-                className="absolute top-6 right-6 z-10 p-3 bg-white/80 backdrop-blur-md hover:bg-white rounded-full transition-all shadow-xl"
+                className="absolute top-6 right-6 z-10 p-3 bg-white/80 dark:bg-zinc-800/80 backdrop-blur-md hover:bg-white dark:hover:bg-zinc-700 rounded-full transition-all shadow-xl text-zinc-900 dark:text-zinc-100"
               >
                 <X size={24} />
               </button>
 
-              <div className="w-full bg-gray-50 relative aspect-square">
+              <div className="w-full bg-zinc-50 dark:bg-zinc-800 relative aspect-square">
                 <img 
                   src={selectedItem.imageUrl || `https://picsum.photos/seed/${selectedItem.id}/800/800`} 
                   alt={selectedItem.name} 
@@ -509,7 +509,7 @@ export const Inventory: React.FC = () => {
                 <div className="absolute top-8 left-8">
                   <span className={`badge px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest ${
                     selectedItem.rarity === 'legendary' ? 'bg-yellow-400 text-black border-yellow-400' :
-                    selectedItem.rarity === 'rare' ? 'bg-black text-white border-black' : 'bg-white text-black border-gray-100'
+                    selectedItem.rarity === 'rare' ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 border-zinc-900 dark:border-zinc-100' : 'bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 border-zinc-100 dark:border-zinc-800'
                   }`}>
                     {selectedItem.rarity}
                   </span>
@@ -519,27 +519,27 @@ export const Inventory: React.FC = () => {
               <div className="w-full p-8 flex flex-col justify-between">
                 <div className="space-y-8">
                   <div className="space-y-2">
-                    <p className="text-[10px] text-gray-400 uppercase tracking-[0.2em] font-bold">
+                    <p className="text-[10px] text-zinc-500 dark:text-zinc-400 uppercase tracking-[0.2em] font-bold">
                       {selectedItem.country} • {selectedItem.year} • {selectedItem.type}
                     </p>
-                    <h2 className="text-4xl font-display font-bold leading-tight">{selectedItem.name}</h2>
+                    <h2 className="text-4xl font-display font-bold leading-tight text-zinc-900 dark:text-zinc-50">{selectedItem.name}</h2>
                   </div>
 
                   <div className="space-y-4">
-                    <h3 className="text-[10px] uppercase font-bold tracking-widest text-gray-400">The Story</h3>
-                    <p className="text-gray-600 text-sm leading-relaxed font-sans">
+                    <h3 className="text-[10px] uppercase font-bold tracking-widest text-zinc-500 dark:text-zinc-400">The Story</h3>
+                    <p className="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed font-sans">
                       {selectedItem.description || "This rare piece has a rich history waiting to be discovered. Each detail reflects the era it belongs to, making it a prized addition to any serious collector's inventory."}
                     </p>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-8 py-8 border-y border-gray-100">
+                  <div className="grid grid-cols-2 gap-8 py-8 border-y border-zinc-100 dark:border-zinc-800">
                     <div>
-                      <p className="text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-1">Source</p>
-                      <p className="text-2xl font-bold uppercase">{selectedItem.source}</p>
+                      <p className="text-[10px] text-zinc-500 dark:text-zinc-400 uppercase tracking-widest font-bold mb-1">Source</p>
+                      <p className="text-2xl font-bold uppercase text-zinc-900 dark:text-zinc-50">{selectedItem.source}</p>
                     </div>
                     <div>
-                      <p className="text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-1">Quantity</p>
-                      <p className="text-2xl font-bold">{selectedItem.quantity}</p>
+                      <p className="text-[10px] text-zinc-500 dark:text-zinc-400 uppercase tracking-widest font-bold mb-1">Quantity</p>
+                      <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">{selectedItem.quantity}</p>
                     </div>
                   </div>
                 </div>

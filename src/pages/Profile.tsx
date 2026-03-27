@@ -306,7 +306,7 @@ export const Profile: React.FC = () => {
       <motion.div 
         animate={{ rotate: 360 }}
         transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-        className="w-12 h-12 border-4 border-black border-t-transparent rounded-full"
+        className="w-12 h-12 border-4 border-zinc-900 dark:border-zinc-100 border-t-transparent rounded-full"
       />
     </div>
   );
@@ -318,12 +318,12 @@ export const Profile: React.FC = () => {
         animate={{ opacity: 1, y: 0 }}
         className="max-w-xl mx-auto text-center space-y-8 py-24"
       >
-        <div className="w-24 h-24 bg-accent/20 rounded-[2rem] flex items-center justify-center mx-auto">
-          <User size={48} className="text-black/20" />
+        <div className="w-24 h-24 bg-zinc-100 dark:bg-zinc-800 rounded-[2rem] flex items-center justify-center mx-auto">
+          <User size={48} className="text-zinc-400 dark:text-zinc-600" />
         </div>
         <div className="space-y-4">
-          <h1 className="text-5xl font-display font-bold">Join Numisca</h1>
-          <p className="text-gray-500 font-medium">Sign in to manage your collection, swap with others, and track your progress.</p>
+          <h1 className="text-5xl font-display font-bold text-zinc-900 dark:text-zinc-50">Join Numisca</h1>
+          <p className="text-zinc-500 dark:text-zinc-400 font-medium">Sign in to manage your collection, swap with others, and track your progress.</p>
         </div>
         <button onClick={signInWithGoogle} className="btn-pill w-full max-w-xs mx-auto">
           Login with Google
@@ -338,17 +338,17 @@ export const Profile: React.FC = () => {
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="card-curved p-6 flex flex-col gap-6 items-center text-center"
+        className="card-curved p-6 flex flex-col gap-6 items-center text-center bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800"
       >
         <div className="relative group">
           <motion.img 
             whileHover={{ scale: 1.05 }}
             src={profile?.photoURL || user.photoURL || ''} 
             alt="Profile" 
-            className="w-32 h-32 rounded-full border-4 border-black object-cover shadow-2xl"
+            className="w-32 h-32 rounded-full border-4 border-zinc-900 dark:border-zinc-100 object-cover shadow-2xl"
             referrerPolicy="no-referrer"
           />
-          <div className="absolute -bottom-1 -right-1 bg-black text-white p-2 rounded-full border-4 border-white">
+          <div className="absolute -bottom-1 -right-1 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 p-2 rounded-full border-4 border-white dark:border-zinc-900">
             <Award size={16} />
           </div>
         </div>
@@ -357,48 +357,48 @@ export const Profile: React.FC = () => {
           <div className="space-y-4">
             <div>
               <div className="flex items-center justify-center gap-2">
-                <h1 className="text-3xl font-display font-bold tracking-tight truncate max-w-[200px]">{profile?.name}</h1>
+                <h1 className="text-3xl font-display font-bold tracking-tight truncate max-w-[200px] text-zinc-900 dark:text-zinc-50">{profile?.name}</h1>
                 {profile?.verificationStatus === 'verified' && (
                   <motion.div 
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     className="text-blue-500"
                   >
-                    <CheckCircle size={24} fill="currentColor" className="text-white" />
+                    <CheckCircle size={24} fill="currentColor" className="text-white dark:text-zinc-900" />
                   </motion.div>
                 )}
               </div>
               <div className="flex flex-col items-center gap-2 mt-2">
-                <span className="text-[8px] uppercase tracking-[0.2em] font-bold px-3 py-1 bg-black text-white rounded-full">
+                <span className="text-[8px] uppercase tracking-[0.2em] font-bold px-3 py-1 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-full">
                   {profile?.role === 'admin' ? 'Elite Administrator' : 'Advanced Collector'}
                 </span>
-                <div className="flex items-center gap-1 text-gray-400 text-[10px] font-bold uppercase tracking-widest">
+                <div className="flex items-center gap-1 text-zinc-400 dark:text-zinc-500 text-[10px] font-bold uppercase tracking-widest">
                   <MapPin size={12} />
                   <span>{profile?.location || 'Global Collector'}</span>
                 </div>
               </div>
             </div>
             {profile?.bio && (
-              <p className="text-xs text-gray-500 leading-relaxed line-clamp-3">{profile.bio}</p>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed line-clamp-3">{profile.bio}</p>
             )}
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <div className="stat-card p-3">
-              <span className="text-xl font-display font-bold">{inventoryStats.total}</span>
-              <span className="text-[7px] uppercase tracking-widest font-bold opacity-60">Total Items</span>
+            <div className="stat-card p-3 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-800">
+              <span className="text-xl font-display font-bold text-zinc-900 dark:text-zinc-50">{inventoryStats.total}</span>
+              <span className="text-[7px] uppercase tracking-widest font-bold text-zinc-400 dark:text-zinc-500">Total Items</span>
             </div>
-            <div className="stat-card p-3">
-              <span className="text-xl font-display font-bold">{profile?.wishlist?.length || 0}</span>
-              <span className="text-[7px] uppercase tracking-widest font-bold opacity-60">Wishlist</span>
+            <div className="stat-card p-3 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-800">
+              <span className="text-xl font-display font-bold text-zinc-900 dark:text-zinc-50">{profile?.wishlist?.length || 0}</span>
+              <span className="text-[7px] uppercase tracking-widest font-bold text-zinc-400 dark:text-zinc-500">Wishlist</span>
             </div>
-            <div className="stat-card p-3">
-              <span className="text-xl font-display font-bold">{inventoryStats.countries}</span>
-              <span className="text-[7px] uppercase tracking-widest font-bold opacity-60">Countries</span>
+            <div className="stat-card p-3 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-800">
+              <span className="text-xl font-display font-bold text-zinc-900 dark:text-zinc-50">{inventoryStats.countries}</span>
+              <span className="text-[7px] uppercase tracking-widest font-bold text-zinc-400 dark:text-zinc-500">Countries</span>
             </div>
-            <div className="stat-card p-3">
-              <span className="text-xl font-display font-bold">#--</span>
-              <span className="text-[7px] uppercase tracking-widest font-bold opacity-60">Ranking</span>
+            <div className="stat-card p-3 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-800">
+              <span className="text-xl font-display font-bold text-zinc-900 dark:text-zinc-50">#--</span>
+              <span className="text-[7px] uppercase tracking-widest font-bold text-zinc-400 dark:text-zinc-500">Ranking</span>
             </div>
           </div>
 
@@ -443,18 +443,18 @@ export const Profile: React.FC = () => {
       {/* Edit Profile Modal */}
       <AnimatePresence>
         {isEditing && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-6">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 dark:bg-black/80 backdrop-blur-md p-6">
             <motion.div 
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="bg-white p-8 max-w-lg w-full rounded-[2.5rem] shadow-2xl relative max-h-[90vh] overflow-y-auto"
+              className="bg-white dark:bg-zinc-900 p-8 max-w-lg w-full rounded-[2.5rem] shadow-2xl relative max-h-[90vh] overflow-y-auto border border-zinc-200 dark:border-zinc-800"
             >
               <div className="flex justify-between items-center mb-8">
-                <h2 className="text-3xl font-display font-bold">Edit Profile</h2>
+                <h2 className="text-3xl font-display font-bold text-zinc-900 dark:text-zinc-50">Edit Profile</h2>
                 <button 
                   onClick={() => setIsEditing(false)}
-                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                  className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full transition-colors text-zinc-900 dark:text-zinc-100"
                 >
                   <X size={24} />
                 </button>
@@ -462,7 +462,7 @@ export const Profile: React.FC = () => {
 
               <form onSubmit={handleUpdateProfile} className="space-y-6">
                 {cameraError && (
-                  <div className="p-3 bg-red-50 text-red-500 text-[10px] font-bold uppercase tracking-widest rounded-xl border border-red-100 animate-pulse">
+                  <div className="p-3 bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400 text-[10px] font-bold uppercase tracking-widest rounded-xl border border-red-100 dark:border-red-900/30 animate-pulse">
                     {cameraError}
                   </div>
                 )}
@@ -471,49 +471,49 @@ export const Profile: React.FC = () => {
                     <img 
                       src={editForm.photoURL || user.photoURL || ''} 
                       alt="Avatar Preview" 
-                      className="w-24 h-24 rounded-full border-2 border-black object-cover"
+                      className="w-24 h-24 rounded-full border-2 border-zinc-900 dark:border-zinc-100 object-cover"
                     />
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 rounded-full">
-                      <label className="cursor-pointer p-1.5 bg-white text-black rounded-full hover:scale-110 transition-transform">
+                      <label className="cursor-pointer p-1.5 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 rounded-full hover:scale-110 transition-transform">
                         <Upload size={12} />
                         <input type="file" className="hidden" accept="image/*" onChange={handleFileChange} />
                       </label>
                       <button 
                         type="button"
                         onClick={startCamera}
-                        className="p-1.5 bg-white text-black rounded-full hover:scale-110 transition-transform"
+                        className="p-1.5 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 rounded-full hover:scale-110 transition-transform"
                       >
                         <Camera size={12} />
                       </button>
                     </div>
                   </div>
-                  <span className="text-[10px] uppercase font-bold tracking-widest text-gray-400">Profile Picture</span>
+                  <span className="text-[10px] uppercase font-bold tracking-widest text-zinc-400 dark:text-zinc-500">Profile Picture</span>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[10px] uppercase font-bold tracking-widest text-gray-400 ml-1">Display Name</label>
+                  <label className="text-[10px] uppercase font-bold tracking-widest text-zinc-400 dark:text-zinc-500 ml-1">Display Name</label>
                   <input 
                     required
                     type="text" 
-                    className="input-field" 
+                    className="input-field bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100" 
                     value={editForm.name}
                     onChange={(e) => setEditForm({...editForm, name: e.target.value})}
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] uppercase font-bold tracking-widest text-gray-400 ml-1">Location</label>
+                  <label className="text-[10px] uppercase font-bold tracking-widest text-zinc-400 dark:text-zinc-500 ml-1">Location</label>
                   <input 
                     type="text" 
-                    className="input-field" 
+                    className="input-field bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100" 
                     value={editForm.location}
                     onChange={(e) => setEditForm({...editForm, location: e.target.value})}
                     placeholder="e.g. London, UK"
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] uppercase font-bold tracking-widest text-gray-400 ml-1">Bio</label>
+                  <label className="text-[10px] uppercase font-bold tracking-widest text-zinc-400 dark:text-zinc-500 ml-1">Bio</label>
                   <textarea 
-                    className="input-field min-h-[120px] py-4" 
+                    className="input-field min-h-[120px] py-4 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100" 
                     value={editForm.bio}
                     onChange={(e) => setEditForm({...editForm, bio: e.target.value})}
                     placeholder="Tell the Society about your collection..."
@@ -623,8 +623,8 @@ export const Profile: React.FC = () => {
       {/* Collection Overview */}
       <section className="space-y-6">
         <div className="flex justify-between items-end">
-          <h2 className="text-3xl font-display">Collection Overview</h2>
-          <button className="text-xs font-bold uppercase tracking-widest border-b-2 border-black pb-1 hover:text-gray-500 transition-colors">
+          <h2 className="text-3xl font-display text-zinc-900 dark:text-zinc-50">Collection Overview</h2>
+          <button className="text-xs font-bold uppercase tracking-widest border-b-2 border-zinc-900 dark:border-zinc-100 pb-1 hover:text-zinc-500 transition-colors text-zinc-900 dark:text-zinc-100">
             View Full Inventory
           </button>
         </div>
@@ -635,31 +635,31 @@ export const Profile: React.FC = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
-              className="card-curved p-5 group cursor-pointer"
+              className="card-curved p-5 group cursor-pointer bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800"
             >
               <div className="flex justify-between items-start mb-3">
-                <div className="p-2.5 bg-black text-white rounded-xl group-hover:scale-110 transition-transform">
+                <div className="p-2.5 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-xl group-hover:scale-110 transition-transform">
                   <item.icon size={20} />
                 </div>
-                <ChevronRight size={14} className="text-gray-300 group-hover:translate-x-1 transition-transform" />
+                <ChevronRight size={14} className="text-zinc-300 dark:text-zinc-700 group-hover:translate-x-1 transition-transform" />
               </div>
               <div className="space-y-1">
-                <h3 className="text-xl font-display">{item.value}</h3>
-                <p className="text-[8px] uppercase tracking-widest font-bold text-gray-400">{item.name}</p>
+                <h3 className="text-xl font-display text-zinc-900 dark:text-zinc-50">{item.value}</h3>
+                <p className="text-[8px] uppercase tracking-widest font-bold text-zinc-400 dark:text-zinc-500">{item.name}</p>
               </div>
-              <div className="mt-3 h-1 bg-gray-100 rounded-full overflow-hidden">
+              <div className="mt-3 h-1 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
                 <motion.div 
                   initial={{ width: 0 }}
                   animate={{ width: `${(item.value / (inventoryStats.total || 1)) * 100}%` }}
                   transition={{ duration: 1, delay: 0.5 }}
-                  className="h-full bg-black"
+                  className="h-full bg-zinc-900 dark:bg-zinc-100"
                 />
               </div>
             </motion.div>
           ))}
           {inventoryStats.types.length === 0 && (
-            <div className="col-span-full py-12 text-center card-curved bg-gray-50 border-dashed border-2 border-gray-200">
-              <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">Your collection is empty</p>
+            <div className="col-span-full py-12 text-center card-curved bg-zinc-50 dark:bg-zinc-800/50 border-dashed border-2 border-zinc-200 dark:border-zinc-800">
+              <p className="text-zinc-400 dark:text-zinc-500 font-bold uppercase tracking-widest text-xs">Your collection is empty</p>
             </div>
           )}
         </div>
@@ -670,14 +670,14 @@ export const Profile: React.FC = () => {
         <motion.section 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="card-curved p-6 space-y-6"
+          className="card-curved p-6 space-y-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800"
         >
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 text-zinc-900 dark:text-zinc-50">
               <Globe size={18} />
               <h2 className="text-lg font-display">Global Presence</h2>
             </div>
-            <span className="text-[8px] uppercase tracking-widest font-bold text-gray-400">{inventoryStats.countries} Countries</span>
+            <span className="text-[8px] uppercase tracking-widest font-bold text-zinc-400 dark:text-zinc-500">{inventoryStats.countries} Countries</span>
           </div>
           <div className="h-[200px]">
             <WorldMap collectedCountries={collectedCountries} />
@@ -687,9 +687,9 @@ export const Profile: React.FC = () => {
         <motion.section 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="card-curved p-6 space-y-6"
+          className="card-curved p-6 space-y-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800"
         >
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 text-zinc-900 dark:text-zinc-50">
             <TrendingUp size={18} />
             <h2 className="text-lg font-display">Distribution</h2>
           </div>
@@ -711,24 +711,24 @@ export const Profile: React.FC = () => {
                     ))}
                   </Pie>
                   <Tooltip 
-                    contentStyle={{ borderRadius: '1rem', border: 'none', boxShadow: '0 10px 30px rgba(0,0,0,0.1)', padding: '0.5rem', fontSize: '10px' }}
+                    contentStyle={{ borderRadius: '1rem', border: 'none', boxShadow: '0 10px 30px rgba(0,0,0,0.1)', padding: '0.5rem', fontSize: '10px', backgroundColor: '#18181b', color: '#f4f4f5' }}
                   />
                 </PieChart>
               </ResponsiveContainer>
             ) : (
-              <div className="h-full flex items-center justify-center text-gray-300">
+              <div className="h-full flex items-center justify-center text-zinc-300 dark:text-zinc-700">
                 <TrendingUp size={32} className="opacity-20" />
               </div>
             )}
           </div>
           <div className="grid grid-cols-2 gap-2">
             {inventoryStats.types.map((type) => (
-              <div key={type.name} className="flex items-center justify-between p-2 bg-gray-50 rounded-xl">
+              <div key={type.name} className="flex items-center justify-between p-2 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl">
                 <div className="flex items-center gap-1.5">
                   <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: type.color }} />
-                  <span className="text-[7px] uppercase font-bold tracking-widest text-gray-500 truncate max-w-[50px]">{type.name}</span>
+                  <span className="text-[7px] uppercase font-bold tracking-widest text-zinc-500 dark:text-zinc-400 truncate max-w-[50px]">{type.name}</span>
                 </div>
-                <span className="text-[10px] font-bold">{type.value}</span>
+                <span className="text-[10px] font-bold text-zinc-900 dark:text-zinc-50">{type.value}</span>
               </div>
             ))}
           </div>
@@ -739,8 +739,8 @@ export const Profile: React.FC = () => {
       <div className="grid grid-cols-1 gap-8">
         <section className="space-y-6">
           <div className="flex justify-between items-end">
-            <h2 className="text-2xl font-display">Recent Swaps</h2>
-            <button className="text-[8px] font-bold uppercase tracking-widest text-gray-400 hover:text-black transition-colors">View All</button>
+            <h2 className="text-2xl font-display text-zinc-900 dark:text-zinc-50">Recent Swaps</h2>
+            <button className="text-[8px] font-bold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">View All</button>
           </div>
           <div className="space-y-3">
             {[
@@ -750,18 +750,18 @@ export const Profile: React.FC = () => {
               <motion.div 
                 key={swap.id}
                 whileHover={{ x: 5 }}
-                className="card-curved p-4 flex items-center justify-between group cursor-pointer border border-black/5"
+                className="card-curved p-4 flex items-center justify-between group cursor-pointer border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900"
               >
                 <div className="flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${swap.type === 'Received' ? 'bg-green-50 text-green-600' : 'bg-blue-50 text-blue-600'}`}>
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${swap.type === 'Received' ? 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400' : 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'}`}>
                     <Repeat size={16} />
                   </div>
                   <div className="min-w-0">
-                    <h4 className="text-[10px] font-bold uppercase tracking-widest truncate max-w-[150px]">{swap.item}</h4>
-                    <p className="text-[7px] text-gray-400 font-bold uppercase tracking-tighter truncate">With {swap.partner} • {swap.type}</p>
+                    <h4 className="text-[10px] font-bold uppercase tracking-widest truncate max-w-[150px] text-zinc-900 dark:text-zinc-50">{swap.item}</h4>
+                    <p className="text-[7px] text-zinc-400 dark:text-zinc-500 font-bold uppercase tracking-tighter truncate">With {swap.partner} • {swap.type}</p>
                   </div>
                 </div>
-                <span className="text-[8px] font-bold text-gray-300 uppercase tracking-widest whitespace-nowrap">{swap.date}</span>
+                <span className="text-[8px] font-bold text-zinc-300 dark:text-zinc-700 uppercase tracking-widest whitespace-nowrap">{swap.date}</span>
               </motion.div>
             ))}
           </div>
@@ -769,17 +769,17 @@ export const Profile: React.FC = () => {
 
         <section className="space-y-6">
           <div className="flex justify-between items-end">
-            <h2 className="text-2xl font-display">Wishlist</h2>
-            <button className="text-[8px] font-bold uppercase tracking-widest text-gray-400 hover:text-black transition-colors">View All</button>
+            <h2 className="text-2xl font-display text-zinc-900 dark:text-zinc-50">Wishlist</h2>
+            <button className="text-[8px] font-bold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">View All</button>
           </div>
           <div className="space-y-3">
             {wishlistItems.slice(0, 3).map((item) => (
               <motion.div 
                 key={item.id}
                 whileHover={{ scale: 1.02 }}
-                className="card-curved p-3 flex items-center gap-3 group cursor-pointer border border-black/5"
+                className="card-curved p-3 flex items-center gap-3 group cursor-pointer border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900"
               >
-                <div className="w-12 h-12 bg-gray-50 rounded-lg overflow-hidden flex-shrink-0">
+                <div className="w-12 h-12 bg-zinc-50 dark:bg-zinc-800 rounded-lg overflow-hidden flex-shrink-0">
                   <img 
                     src={item.imageUrl || `https://picsum.photos/seed/${item.id}/200/200`} 
                     alt={item.name}
@@ -788,16 +788,16 @@ export const Profile: React.FC = () => {
                   />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h4 className="text-[8px] font-bold uppercase tracking-widest leading-tight truncate">{item.name}</h4>
-                  <p className="text-[10px] font-bold mt-0.5">৳{item.price}</p>
+                  <h4 className="text-[8px] font-bold uppercase tracking-widest leading-tight truncate text-zinc-900 dark:text-zinc-50">{item.name}</h4>
+                  <p className="text-[10px] font-bold mt-0.5 text-zinc-900 dark:text-zinc-50">৳{item.price}</p>
                 </div>
-                <button className="p-1.5 text-gray-300 hover:text-black transition-colors">
+                <button className="p-1.5 text-zinc-300 dark:text-zinc-700 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">
                   <Heart size={14} />
                 </button>
               </motion.div>
             ))}
             {wishlistItems.length === 0 && (
-              <div className="py-8 text-center card-curved bg-gray-50/50 border-dashed border-2 border-gray-100">
+              <div className="py-8 text-center card-curved bg-zinc-50/50 dark:bg-zinc-800/50 border-dashed border-2 border-zinc-100 dark:border-zinc-800">
                 <Heart size={20} className="mx-auto text-gray-200 mb-2" />
                 <p className="text-[8px] text-gray-400 font-bold uppercase tracking-widest">Empty Wishlist</p>
               </div>

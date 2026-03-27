@@ -156,17 +156,17 @@ export const Shop: React.FC = () => {
         className="flex flex-col gap-4"
       >
         <div>
-          <h1 className="text-3xl font-display font-bold tracking-tight">The Shop</h1>
-          <p className="text-xs text-gray-500 mt-1 font-sans">Exclusive collectibles curated by Numisca admins.</p>
+          <h1 className="text-3xl font-display font-bold tracking-tight text-zinc-900 dark:text-zinc-50">The Shop</h1>
+          <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 font-sans">Exclusive collectibles curated by Numisca admins.</p>
         </div>
         
         <div className="flex items-center gap-2 w-full">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500" size={14} />
             <input 
               type="text" 
               placeholder="Search items..." 
-              className="input-field pl-9 py-2 text-xs"
+              className="input-field pl-9 py-2 text-xs bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -191,8 +191,8 @@ export const Shop: React.FC = () => {
               onClick={() => setFilter(t)}
               className={`text-[9px] uppercase tracking-widest font-bold px-4 py-1.5 rounded-full transition-all border whitespace-nowrap ${
                 filter === t 
-                  ? 'bg-black text-white border-black' 
-                  : 'bg-white text-gray-400 border-gray-100'
+                  ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 border-zinc-900 dark:border-zinc-100' 
+                  : 'bg-white dark:bg-zinc-900 text-zinc-400 dark:text-zinc-500 border-zinc-100 dark:border-zinc-800'
               }`}
             >
               {t}s
@@ -204,7 +204,7 @@ export const Shop: React.FC = () => {
           <select 
             value={rarityFilter}
             onChange={(e) => setRarityFilter(e.target.value)}
-            className="flex-1 text-[9px] uppercase font-bold tracking-widest bg-white border border-gray-100 rounded-full px-3 py-2 outline-none focus:border-black transition-colors"
+            className="flex-1 text-[9px] uppercase font-bold tracking-widest bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 rounded-full px-3 py-2 outline-none focus:border-zinc-900 dark:focus:border-zinc-100 transition-colors"
           >
             <option value="all">All Rarities</option>
             <option value="common">Common</option>
@@ -216,7 +216,7 @@ export const Shop: React.FC = () => {
           <select 
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="flex-1 text-[9px] uppercase font-bold tracking-widest bg-white border border-gray-100 rounded-full px-3 py-2 outline-none focus:border-black transition-colors"
+            className="flex-1 text-[9px] uppercase font-bold tracking-widest bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 rounded-full px-3 py-2 outline-none focus:border-zinc-900 dark:focus:border-zinc-100 transition-colors"
           >
             <option value="newest">Newest</option>
             <option value="price-low">Price: Low-High</option>
@@ -233,13 +233,13 @@ export const Shop: React.FC = () => {
               initial={{ opacity: 0, y: "100%" }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: "100%" }}
-              className="bg-white w-full rounded-t-[2rem] shadow-2xl max-h-[90vh] overflow-y-auto relative p-6"
+              className="bg-white dark:bg-zinc-900 w-full rounded-t-[2rem] shadow-2xl max-h-[90vh] overflow-y-auto relative p-6"
             >
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-display font-bold">New Collectible</h2>
+                <h2 className="text-xl font-display font-bold text-zinc-900 dark:text-zinc-50">New Collectible</h2>
                 <button 
                   onClick={() => setIsAdding(false)}
-                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                  className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full transition-colors text-zinc-900 dark:text-zinc-100"
                 >
                   <X size={20} />
                 </button>
@@ -366,85 +366,85 @@ export const Shop: React.FC = () => {
       ) : (
         <div className="grid grid-cols-1 gap-4">
           {filteredAndSortedItems.map((item, index) => (
-            <motion.div 
-              key={item.id}
-              layout
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.05 }}
-              className="group card-curved p-3 bg-white border border-black/5 flex gap-4"
-            >
-              <div 
-                className="w-24 h-24 bg-gray-50 rounded-xl overflow-hidden relative flex-shrink-0"
-                onClick={() => setSelectedProduct(item)}
+              <motion.div 
+                key={item.id}
+                layout
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05 }}
+                className="group card-curved p-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 flex gap-4"
               >
-                <img 
-                  src={item.imageUrl || `https://picsum.photos/seed/${item.id}/600/600`} 
-                  alt={item.name} 
-                  className="w-full h-full object-cover"
-                  referrerPolicy="no-referrer"
-                />
-                <div className="absolute top-1 left-1">
-                  <span className={`text-[7px] px-1.5 py-0.5 rounded-full font-bold uppercase tracking-widest ${
-                    item.rarity === 'legendary' ? 'bg-yellow-400 text-black' :
-                    item.rarity === 'rare' ? 'bg-black text-white' : 'bg-white text-black'
-                  }`}>
-                    {item.rarity}
-                  </span>
-                </div>
-              </div>
-              
-              <div className="flex-1 flex flex-col justify-between min-w-0">
-                <div onClick={() => setSelectedProduct(item)} className="cursor-pointer">
-                  <div className="flex justify-between items-start gap-2">
-                    <h3 className="font-display font-bold text-sm leading-tight truncate">{item.name}</h3>
-                    <button 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleWishlist(item.id);
-                      }}
-                      className={`p-1.5 rounded-lg transition-all ${
-                        profile?.wishlist?.includes(item.id)
-                          ? 'bg-red-500 text-white'
-                          : 'bg-gray-50 text-black'
-                      }`}
-                    >
-                      <Heart size={12} className={profile?.wishlist?.includes(item.id) ? 'fill-current' : ''} />
-                    </button>
+                <div 
+                  className="w-24 h-24 bg-zinc-50 dark:bg-zinc-800 rounded-xl overflow-hidden relative flex-shrink-0"
+                  onClick={() => setSelectedProduct(item)}
+                >
+                  <img 
+                    src={item.imageUrl || `https://picsum.photos/seed/${item.id}/600/600`} 
+                    alt={item.name} 
+                    className="w-full h-full object-cover"
+                    referrerPolicy="no-referrer"
+                  />
+                  <div className="absolute top-1 left-1">
+                    <span className={`text-[7px] px-1.5 py-0.5 rounded-full font-bold uppercase tracking-widest ${
+                      item.rarity === 'legendary' ? 'bg-yellow-400 text-black' :
+                      item.rarity === 'rare' ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900' : 'bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100'
+                    }`}>
+                      {item.rarity}
+                    </span>
                   </div>
-                  <p className="text-[9px] text-gray-400 uppercase tracking-widest font-bold mt-1">
-                    {item.country} • {item.year}
-                  </p>
                 </div>
                 
-                <div className="flex items-center justify-between mt-2">
-                  <span className="font-bold text-base">৳{item.price}</span>
-                  <div className="flex gap-1">
-                    <button 
-                      onClick={() => handleAddToCart(item)}
-                      disabled={item.status === 'sold'}
-                      className={`flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all ${
-                        item.status === 'sold'
-                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                          : addedToCart === item.id 
-                            ? 'bg-green-500 text-white' 
-                            : 'bg-black text-white'
-                      }`}
-                    >
-                      {item.status === 'sold' ? 'Sold' : addedToCart === item.id ? 'Added' : 'Add'}
-                    </button>
-                    {isAdmin && (
+                <div className="flex-1 flex flex-col justify-between min-w-0">
+                  <div onClick={() => setSelectedProduct(item)} className="cursor-pointer">
+                    <div className="flex justify-between items-start gap-2">
+                      <h3 className="font-display font-bold text-sm leading-tight truncate text-zinc-900 dark:text-zinc-50">{item.name}</h3>
                       <button 
-                        onClick={() => handleDeleteItem(item.id)}
-                        className="p-1.5 border border-gray-100 rounded-lg text-red-500"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleWishlist(item.id);
+                        }}
+                        className={`p-1.5 rounded-lg transition-all ${
+                          profile?.wishlist?.includes(item.id)
+                            ? 'bg-red-500 text-white'
+                            : 'bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100'
+                        }`}
                       >
-                        <Trash2 size={12} />
+                        <Heart size={12} className={profile?.wishlist?.includes(item.id) ? 'fill-current' : ''} />
                       </button>
-                    )}
+                    </div>
+                    <p className="text-[9px] text-zinc-500 dark:text-zinc-400 uppercase tracking-widest font-bold mt-1">
+                      {item.country} • {item.year}
+                    </p>
+                  </div>
+                  
+                  <div className="flex items-center justify-between mt-2">
+                    <span className="font-bold text-base text-zinc-900 dark:text-zinc-50">৳{item.price}</span>
+                    <div className="flex gap-1">
+                      <button 
+                        onClick={() => handleAddToCart(item)}
+                        disabled={item.status === 'sold'}
+                        className={`flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all ${
+                          item.status === 'sold'
+                            ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-500 cursor-not-allowed'
+                            : addedToCart === item.id 
+                              ? 'bg-green-500 text-white' 
+                              : 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900'
+                        }`}
+                      >
+                        {item.status === 'sold' ? 'Sold' : addedToCart === item.id ? 'Added' : 'Add'}
+                      </button>
+                      {isAdmin && (
+                        <button 
+                          onClick={() => handleDeleteItem(item.id)}
+                          className="p-1.5 border border-zinc-100 dark:border-zinc-800 rounded-lg text-red-500"
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            </motion.div>
+              </motion.div>
           ))}
         </div>
       )}
@@ -455,16 +455,16 @@ export const Shop: React.FC = () => {
               initial={{ opacity: 0, y: "100%" }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: "100%" }}
-              className="bg-white w-full rounded-t-[2rem] shadow-2xl overflow-y-auto relative max-h-[90vh]"
+              className="bg-white dark:bg-zinc-900 w-full rounded-t-[2rem] shadow-2xl overflow-y-auto relative max-h-[90vh]"
             >
               <button 
                 onClick={() => setSelectedProduct(null)}
-                className="absolute top-4 right-4 z-10 p-2 bg-white/80 backdrop-blur-md rounded-full shadow-lg"
+                className="absolute top-4 right-4 z-10 p-2 bg-white/80 dark:bg-zinc-800/80 backdrop-blur-md rounded-full shadow-lg text-zinc-900 dark:text-zinc-100"
               >
                 <X size={20} />
               </button>
 
-              <div className="w-full bg-gray-50 relative aspect-square">
+              <div className="w-full bg-zinc-50 dark:bg-zinc-800 relative aspect-square">
                 <img 
                   src={selectedProduct.imageUrl} 
                   alt={selectedProduct.name} 
@@ -473,7 +473,7 @@ export const Shop: React.FC = () => {
                 <div className="absolute top-4 left-4">
                   <span className={`text-[9px] px-4 py-1.5 rounded-full font-bold uppercase tracking-widest ${
                     selectedProduct.rarity === 'legendary' ? 'bg-yellow-400 text-black' :
-                    selectedProduct.rarity === 'rare' ? 'bg-black text-white' : 'bg-white text-black'
+                    selectedProduct.rarity === 'rare' ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900' : 'bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100'
                   }`}>
                     {selectedProduct.rarity}
                   </span>
@@ -482,27 +482,27 @@ export const Shop: React.FC = () => {
 
               <div className="p-6 space-y-6">
                 <div className="space-y-1">
-                  <p className="text-[9px] text-gray-400 uppercase tracking-[0.2em] font-bold">
+                  <p className="text-[9px] text-zinc-500 dark:text-zinc-400 uppercase tracking-[0.2em] font-bold">
                     {selectedProduct.country} • {selectedProduct.year} • {selectedProduct.type}
                   </p>
-                  <h2 className="text-2xl font-display font-bold leading-tight">{selectedProduct.name}</h2>
+                  <h2 className="text-2xl font-display font-bold leading-tight text-zinc-900 dark:text-zinc-50">{selectedProduct.name}</h2>
                 </div>
 
                 <div className="space-y-2">
-                  <h3 className="text-[9px] uppercase font-bold tracking-widest text-gray-400">The Story</h3>
-                  <p className="text-gray-600 text-xs leading-relaxed font-sans">
+                  <h3 className="text-[9px] uppercase font-bold tracking-widest text-zinc-500 dark:text-zinc-400">The Story</h3>
+                  <p className="text-zinc-600 dark:text-zinc-400 text-xs leading-relaxed font-sans">
                     {selectedProduct.description || "This rare piece has a rich history waiting to be discovered."}
                   </p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 py-4 border-y border-gray-100">
+                <div className="grid grid-cols-2 gap-4 py-4 border-y border-zinc-100 dark:border-zinc-800">
                   <div>
-                    <p className="text-[9px] text-gray-400 uppercase tracking-widest font-bold mb-0.5">Price</p>
-                    <p className="text-lg font-bold">৳{selectedProduct.price}</p>
+                    <p className="text-[9px] text-zinc-500 dark:text-zinc-400 uppercase tracking-widest font-bold mb-0.5">Price</p>
+                    <p className="text-lg font-bold text-zinc-900 dark:text-zinc-50">৳{selectedProduct.price}</p>
                   </div>
                   <div>
-                    <p className="text-[9px] text-gray-400 uppercase tracking-widest font-bold mb-0.5">Stock</p>
-                    <p className="text-lg font-bold">{selectedProduct.quantity} Left</p>
+                    <p className="text-[9px] text-zinc-500 dark:text-zinc-400 uppercase tracking-widest font-bold mb-0.5">Stock</p>
+                    <p className="text-lg font-bold text-zinc-900 dark:text-zinc-50">{selectedProduct.quantity} Left</p>
                   </div>
                 </div>
 
@@ -512,10 +512,10 @@ export const Shop: React.FC = () => {
                     disabled={selectedProduct.status === 'sold'}
                     className={`flex-1 flex items-center justify-center gap-2 py-4 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all ${
                       selectedProduct.status === 'sold'
-                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                        ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-500 cursor-not-allowed'
                         : addedToCart === selectedProduct.id 
                           ? 'bg-green-500 text-white' 
-                          : 'bg-black text-white'
+                          : 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900'
                     }`}
                   >
                     {selectedProduct.status === 'sold' ? 'Sold Out' : addedToCart === selectedProduct.id ? 'Added' : 'Add to Cart'}
@@ -525,7 +525,7 @@ export const Shop: React.FC = () => {
                     className={`p-4 rounded-xl border transition-all ${
                       profile?.wishlist?.includes(selectedProduct.id)
                         ? 'bg-red-500 text-white border-red-500'
-                        : 'border-gray-100 text-black'
+                        : 'border-zinc-100 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100'
                     }`}
                   >
                     <Heart size={20} className={profile?.wishlist?.includes(selectedProduct.id) ? 'fill-current' : ''} />

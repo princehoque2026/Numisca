@@ -55,15 +55,15 @@ export const Home: React.FC<{ onStart: () => void }> = ({ onStart }) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="text-4xl font-display font-bold leading-tight tracking-tighter"
+            className="text-4xl font-display font-bold leading-tight tracking-tighter text-zinc-900 dark:text-zinc-50"
           >
-            The Art of <br /> <span className="text-gray-400">Collecting</span>
+            The Art of <br /> <span className="text-zinc-400 dark:text-zinc-500">Collecting</span>
           </motion.h1>
           <motion.p 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="mt-4 text-sm text-gray-500 font-medium max-w-xs mx-auto"
+            className="mt-4 text-sm text-zinc-600 dark:text-zinc-400 font-medium max-w-xs mx-auto"
           >
             Numisca is a digital sanctuary for numismatists. 
             Discover rare treasures, swap with peers, and curate your legacy.
@@ -93,33 +93,33 @@ export const Home: React.FC<{ onStart: () => void }> = ({ onStart }) => {
         <motion.div 
           className="card-curved p-6 space-y-4"
         >
-          <div className="w-12 h-12 bg-black text-white rounded-xl flex items-center justify-center shadow-lg">
+          <div className="w-12 h-12 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-xl flex items-center justify-center shadow-lg">
             <Shield size={20} />
           </div>
-          <h3 className="text-xl font-display font-bold">Secure Escrow</h3>
-          <p className="text-xs text-gray-500 font-medium leading-relaxed">
+          <h3 className="text-xl font-display font-bold text-zinc-900 dark:text-zinc-50">Secure Escrow</h3>
+          <p className="text-xs text-zinc-600 dark:text-zinc-400 font-medium leading-relaxed">
             Our proprietary swap system ensures both parties receive their items before releasing the trade.
           </p>
         </motion.div>
         <motion.div 
           className="card-curved p-6 space-y-4"
         >
-          <div className="w-12 h-12 bg-black text-white rounded-xl flex items-center justify-center shadow-lg">
+          <div className="w-12 h-12 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-xl flex items-center justify-center shadow-lg">
             <Globe size={20} />
           </div>
-          <h3 className="text-xl font-display font-bold">Global Network</h3>
-          <p className="text-xs text-gray-500 font-medium leading-relaxed">
+          <h3 className="text-xl font-display font-bold text-zinc-900 dark:text-zinc-50">Global Network</h3>
+          <p className="text-xs text-zinc-600 dark:text-zinc-400 font-medium leading-relaxed">
             Connect with collectors from over 150 countries. Expand your horizons across borders.
           </p>
         </motion.div>
         <motion.div 
           className="card-curved p-6 space-y-4"
         >
-          <div className="w-12 h-12 bg-black text-white rounded-xl flex items-center justify-center shadow-lg">
+          <div className="w-12 h-12 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-xl flex items-center justify-center shadow-lg">
             <Zap size={20} />
           </div>
-          <h3 className="text-xl font-display font-bold">Instant Valuation</h3>
-          <p className="text-xs text-gray-500 font-medium leading-relaxed">
+          <h3 className="text-xl font-display font-bold text-zinc-900 dark:text-zinc-50">Instant Valuation</h3>
+          <p className="text-xs text-zinc-600 dark:text-zinc-400 font-medium leading-relaxed">
             Get real-time market data and rarity scores for every item in your personal inventory.
           </p>
         </motion.div>
@@ -129,12 +129,12 @@ export const Home: React.FC<{ onStart: () => void }> = ({ onStart }) => {
       <section className="space-y-8">
         <div className="flex justify-between items-end px-2">
           <div>
-            <h2 className="text-2xl font-display font-bold">Curated Selection</h2>
-            <p className="text-[10px] text-gray-500 mt-1 font-medium">Hand-picked rarities from our curators.</p>
+            <h2 className="text-2xl font-display font-bold text-zinc-900 dark:text-zinc-50">Curated Selection</h2>
+            <p className="text-[10px] text-zinc-500 dark:text-zinc-400 mt-1 font-medium">Hand-picked rarities from our curators.</p>
           </div>
           <button 
             onClick={() => onStart()}
-            className="text-[10px] uppercase tracking-widest font-bold border-b border-black pb-0.5 hover:text-gray-500 transition-colors"
+            className="text-[10px] uppercase tracking-widest font-bold border-b border-zinc-900 dark:border-zinc-100 pb-0.5 hover:text-zinc-500 transition-colors text-zinc-900 dark:text-zinc-100"
           >
             View All
           </button>
@@ -163,10 +163,10 @@ export const Home: React.FC<{ onStart: () => void }> = ({ onStart }) => {
                 </div>
                 <div className="mt-4 flex justify-between items-start px-2">
                   <div className="min-w-0">
-                    <h4 className="font-display text-base font-bold truncate">{item.name}</h4>
-                    <p className="text-[8px] text-gray-400 uppercase tracking-widest font-bold">{item.country} • {item.year}</p>
+                    <h4 className="font-display text-base font-bold truncate text-zinc-900 dark:text-zinc-50">{item.name}</h4>
+                    <p className="text-[8px] text-zinc-500 dark:text-zinc-400 uppercase tracking-widest font-bold">{item.country} • {item.year}</p>
                   </div>
-                  <span className="font-bold text-base">৳{item.price}</span>
+                  <span className="font-bold text-base text-zinc-900 dark:text-zinc-50">৳{item.price}</span>
                 </div>
               </motion.div>
             ))}

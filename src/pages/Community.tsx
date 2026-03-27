@@ -153,17 +153,17 @@ export const Community: React.FC = () => {
   }, [activeChat]);
 
   return (
-    <div className="h-[calc(100vh-12rem)] flex curved-card overflow-hidden bg-white border border-black/5">
+    <div className="h-[calc(100vh-12rem)] flex curved-card overflow-hidden bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
       {/* Sidebar */}
-      <div className={`${showSidebar ? 'w-full' : 'hidden'} border-r border-gray-100 flex flex-col bg-gray-50/50`}>
-        <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-white">
-          <h2 className="text-[10px] uppercase tracking-[0.2em] font-bold text-gray-400">Groups</h2>
+      <div className={`${showSidebar ? 'w-full' : 'hidden'} border-r border-zinc-100 dark:border-zinc-800 flex flex-col bg-zinc-50/50 dark:bg-zinc-900/50`}>
+        <div className="p-6 border-b border-zinc-100 dark:border-zinc-800 flex justify-between items-center bg-white dark:bg-zinc-900">
+          <h2 className="text-[10px] uppercase tracking-[0.2em] font-bold text-zinc-400 dark:text-zinc-500">Groups</h2>
           <button 
             onClick={() => {
               const name = window.prompt('Group Name?');
               if (name) createGroupChat(name);
             }}
-            className="p-2 hover:bg-black hover:text-white rounded-full transition-all"
+            className="p-2 hover:bg-zinc-900 dark:hover:bg-zinc-100 hover:text-white dark:hover:text-zinc-900 rounded-full transition-all text-zinc-900 dark:text-zinc-100"
           >
             <Plus size={16} />
           </button>
@@ -176,19 +176,19 @@ export const Community: React.FC = () => {
                 setActiveChat(chat);
                 setShowSidebar(false);
               }}
-              className={`w-full p-6 text-left border-b border-gray-100/50 transition-all flex items-center gap-4 ${
-                activeChat?.id === chat.id ? 'bg-black text-white shadow-lg z-10' : 'hover:bg-white'
+              className={`w-full p-6 text-left border-b border-zinc-100/50 dark:border-zinc-800/50 transition-all flex items-center gap-4 ${
+                activeChat?.id === chat.id ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 shadow-lg z-10' : 'hover:bg-white dark:hover:bg-zinc-800 text-zinc-900 dark:text-zinc-100'
               }`}
             >
               <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${
-                activeChat?.id === chat.id ? 'bg-white text-black' : 'bg-black text-white'
+                activeChat?.id === chat.id ? 'bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100' : 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900'
               }`}>
                 {chat.type === 'group' ? <Hash size={18} /> : <Users size={18} />}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-[10px] uppercase tracking-widest font-bold truncate">{chat.name}</div>
                 <div className={`text-[8px] uppercase tracking-tighter truncate mt-1 ${
-                  activeChat?.id === chat.id ? 'text-gray-400' : 'text-gray-500'
+                  activeChat?.id === chat.id ? 'text-zinc-400 dark:text-zinc-500' : 'text-zinc-500 dark:text-zinc-400'
                 }`}>
                   {chat.participants.length} members
                 </div>
@@ -199,23 +199,23 @@ export const Community: React.FC = () => {
       </div>
 
       {/* Chat Area */}
-      <div className={`${!showSidebar ? 'w-full' : 'hidden'} flex flex-col bg-white`}>
+      <div className={`${!showSidebar ? 'w-full' : 'hidden'} flex flex-col bg-white dark:bg-zinc-900`}>
         {activeChat ? (
           <>
-            <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-white/80 backdrop-blur-md z-10">
+            <div className="p-4 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md z-10">
               <div className="flex items-center gap-3">
                 <button 
                   onClick={() => setShowSidebar(true)}
-                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                  className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full transition-colors text-zinc-900 dark:text-zinc-100"
                 >
                   <X size={20} className="rotate-45" />
                 </button>
-                <div className="w-10 h-10 bg-black text-white rounded-xl flex items-center justify-center">
+                <div className="w-10 h-10 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-xl flex items-center justify-center">
                   {activeChat.type === 'group' ? <Hash size={18} /> : <Users size={18} />}
                 </div>
                 <div className="min-w-0">
-                  <h2 className="text-lg font-display font-bold leading-tight truncate">{activeChat.name}</h2>
-                  <span className="text-[8px] uppercase tracking-[0.2em] text-gray-400 font-bold">
+                  <h2 className="text-lg font-display font-bold leading-tight truncate text-zinc-900 dark:text-zinc-50">{activeChat.name}</h2>
+                  <span className="text-[8px] uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500 font-bold">
                     {activeChat.participants.length} members
                   </span>
                 </div>
@@ -238,22 +238,22 @@ export const Community: React.FC = () => {
                       {msg.senderPhotoURL && (
                         <img src={msg.senderPhotoURL} alt={msg.senderName} className="w-5 h-5 rounded-full object-cover" />
                       )}
-                      <span className="text-[10px] uppercase tracking-widest font-bold text-gray-400">{msg.senderName}</span>
-                      <span className="text-[8px] text-gray-300 font-bold">
+                      <span className="text-[10px] uppercase tracking-widest font-bold text-zinc-400 dark:text-zinc-500">{msg.senderName}</span>
+                      <span className="text-[8px] text-zinc-300 dark:text-zinc-600 font-bold">
                         {msg.createdAt ? format(msg.createdAt.toDate(), 'HH:mm') : '...'}
                       </span>
                     </div>
                     <div className={`max-w-[75%] space-y-3 ${msg.senderUid === user?.uid ? 'items-end' : 'items-start'}`}>
                       {msg.imageUrl && (
-                        <div className="rounded-2xl overflow-hidden shadow-sm border border-gray-100">
+                        <div className="rounded-2xl overflow-hidden shadow-sm border border-zinc-100 dark:border-zinc-800">
                           <img src={msg.imageUrl} alt="Shared" className="max-w-full max-h-64 object-cover" />
                         </div>
                       )}
                       {msg.text && (
                         <div className={`p-5 text-sm shadow-sm ${
                           msg.senderUid === user?.uid 
-                            ? 'bg-black text-white rounded-2xl rounded-tr-none' 
-                            : 'bg-gray-50 text-black rounded-2xl rounded-tl-none'
+                            ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-2xl rounded-tr-none' 
+                            : 'bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded-2xl rounded-tl-none'
                         }`}>
                           {msg.text}
                         </div>
@@ -264,13 +264,13 @@ export const Community: React.FC = () => {
               </AnimatePresence>
             </div>
 
-            <div className="p-4 border-t border-gray-100 bg-white space-y-4">
+            <div className="p-4 border-t border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 space-y-4">
               {imageFile && (
                 <div className="relative inline-block">
-                  <img src={imageFile} alt="Preview" className="w-20 h-20 object-cover rounded-xl border-2 border-black" />
+                  <img src={imageFile} alt="Preview" className="w-20 h-20 object-cover rounded-xl border-2 border-zinc-900 dark:border-zinc-100" />
                   <button 
                     onClick={() => setImageFile(null)}
-                    className="absolute -top-2 -right-2 bg-black text-white rounded-full p-1 shadow-lg"
+                    className="absolute -top-2 -right-2 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-full p-1 shadow-lg"
                   >
                     <X size={12} />
                   </button>
@@ -281,11 +281,11 @@ export const Community: React.FC = () => {
                   <input
                     type="text"
                     placeholder="Type your message..."
-                    className="w-full input-field rounded-2xl px-6 pr-12"
+                    className="w-full input-field rounded-2xl px-6 pr-12 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100"
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
                   />
-                  <label className="absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer text-gray-400 hover:text-black transition-colors">
+                  <label className="absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer text-zinc-400 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">
                     <ImageIcon size={20} />
                     <input type="file" className="hidden" accept="image/*" onChange={handleImageSelect} />
                   </label>
@@ -302,11 +302,11 @@ export const Community: React.FC = () => {
           </>
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center text-center p-12">
-            <div className="w-24 h-24 bg-gray-50 rounded-[2rem] flex items-center justify-center mb-8">
-              <MessageSquare size={40} className="text-gray-200" />
+            <div className="w-24 h-24 bg-zinc-50 dark:bg-zinc-800 rounded-[2rem] flex items-center justify-center mb-8">
+              <MessageSquare size={40} className="text-zinc-200 dark:text-zinc-700" />
             </div>
-            <h2 className="text-3xl font-display font-bold">Select a Conversation</h2>
-            <p className="text-gray-400 mt-3 max-w-xs font-sans">Join a group or start a direct message with another collector.</p>
+            <h2 className="text-3xl font-display font-bold text-zinc-900 dark:text-zinc-50">Select a Conversation</h2>
+            <p className="text-zinc-400 dark:text-zinc-500 mt-3 max-w-xs font-sans">Join a group or start a direct message with another collector.</p>
           </div>
         )}
       </div>

@@ -137,9 +137,9 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-zinc-950 flex flex-col transition-colors duration-300">
+    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 flex flex-col transition-colors duration-300">
       {/* Header */}
-      <header className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-md z-50 bg-black dark:bg-black border-b border-white/10 px-4 py-3 flex items-center justify-between">
+      <header className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-md z-50 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 px-4 py-3 flex items-center justify-between shadow-sm">
         <div 
           className="flex items-center cursor-pointer group" 
           onClick={() => setActiveTab('home')}
@@ -158,7 +158,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
               {/* Theme Toggle */}
               <button 
                 onClick={toggleTheme}
-                className="p-1.5 text-white hover:bg-white/10 rounded-xl transition-colors"
+                className="p-1.5 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl transition-colors"
                 title={theme === 'dark' ? 'Switch to Light' : 'Switch to Dark'}
               >
                 {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
@@ -168,11 +168,11 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
               <div className="relative">
                 <button 
                   onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-                  className="p-1.5 text-white hover:bg-white/10 rounded-xl transition-colors relative"
+                  className="p-1.5 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl transition-colors relative"
                 >
                   <Bell size={18} />
                   {unreadCount > 0 && (
-                    <span className="absolute top-0.5 right-0.5 w-3.5 h-3.5 bg-red-500 text-white text-[7px] font-bold rounded-full flex items-center justify-center border border-black">
+                    <span className="absolute top-0.5 right-0.5 w-3.5 h-3.5 bg-red-500 text-white text-[7px] font-bold rounded-full flex items-center justify-center border border-white dark:border-zinc-900">
                       {unreadCount}
                     </span>
                   )}
@@ -189,11 +189,11 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                         initial={{ opacity: 0, y: 10, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                        className="absolute top-full right-0 mt-2 w-72 bg-black border border-white/10 rounded-2xl shadow-2xl z-50 overflow-hidden"
+                        className="absolute top-full right-0 mt-2 w-72 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl z-50 overflow-hidden"
                       >
-                        <div className="p-3 border-b border-white/10 flex justify-between items-center">
-                          <span className="text-[8px] uppercase tracking-widest font-bold text-white">Notifications</span>
-                          <span className="text-[7px] text-gray-500 font-bold">{unreadCount} New</span>
+                        <div className="p-3 border-b border-zinc-200 dark:border-zinc-800 flex justify-between items-center">
+                          <span className="text-[8px] uppercase tracking-widest font-bold text-zinc-900 dark:text-zinc-100">Notifications</span>
+                          <span className="text-[7px] text-zinc-500 font-bold">{unreadCount} New</span>
                         </div>
                         <div className="max-h-80 overflow-y-auto">
                           {notifications.length > 0 ? (
@@ -207,27 +207,27 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                                     setIsNotificationsOpen(false);
                                   }
                                 }}
-                                className={`p-3 border-b border-white/5 hover:bg-white/5 transition-colors cursor-pointer ${!n.read ? 'bg-white/5' : ''}`}
+                                className={`p-3 border-b border-zinc-100 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors cursor-pointer ${!n.read ? 'bg-zinc-50 dark:bg-zinc-800/30' : ''}`}
                               >
                                 <div className="flex justify-between items-start mb-1">
                                   <span className={`text-[7px] uppercase font-bold px-1.5 py-0.5 rounded-full ${
-                                    n.type === 'success' ? 'bg-green-500/20 text-green-400' :
-                                    n.type === 'error' ? 'bg-red-500/20 text-red-400' :
-                                    'bg-blue-500/20 text-blue-400'
+                                    n.type === 'success' ? 'bg-green-500/10 text-green-600 dark:text-green-400' :
+                                    n.type === 'error' ? 'bg-red-500/10 text-red-600 dark:text-red-400' :
+                                    'bg-blue-500/10 text-blue-600 dark:text-blue-400'
                                   }`}>
                                     {n.type}
                                   </span>
-                                  <span className="text-[7px] text-gray-500">
+                                  <span className="text-[7px] text-zinc-500">
                                     {n.createdAt?.seconds ? new Date(n.createdAt.seconds * 1000).toLocaleDateString() : 'Just now'}
                                   </span>
                                 </div>
-                                <h4 className="text-[9px] font-bold text-white uppercase tracking-tight">{n.title}</h4>
-                                <p className="text-[9px] text-gray-400 mt-0.5 leading-relaxed">{n.message}</p>
+                                <h4 className="text-[9px] font-bold text-zinc-900 dark:text-zinc-100 uppercase tracking-tight">{n.title}</h4>
+                                <p className="text-[9px] text-zinc-500 dark:text-zinc-400 mt-0.5 leading-relaxed">{n.message}</p>
                               </div>
                             ))
                           ) : (
                             <div className="p-6 text-center">
-                              <p className="text-[9px] text-gray-500 uppercase font-bold">No notifications</p>
+                              <p className="text-[9px] text-zinc-500 uppercase font-bold">No notifications</p>
                             </div>
                           )}
                         </div>
@@ -240,11 +240,11 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
               {/* Cart */}
               <button 
                 onClick={() => setIsCartOpen(true)}
-                className="relative p-1.5 text-white hover:bg-white/10 rounded-xl transition-colors"
+                className="relative p-1.5 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl transition-colors"
               >
                 <ShoppingCart size={18} />
                 {itemCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-white text-black text-[8px] font-bold rounded-full flex items-center justify-center border border-black">
+                  <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 text-[8px] font-bold rounded-full flex items-center justify-center border border-white dark:border-zinc-900">
                     {itemCount}
                   </span>
                 )}
@@ -258,27 +258,27 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
                 <img 
                   src={profile?.photoURL || user.photoURL || ''} 
                   alt="Profile" 
-                  className="w-8 h-8 rounded-lg border border-white/10 transition-transform group-hover:scale-105"
+                  className="w-8 h-8 rounded-lg border border-zinc-200 dark:border-zinc-800 transition-transform group-hover:scale-105"
                   referrerPolicy="no-referrer"
                 />
-                <div className="absolute top-full right-0 mt-2 w-40 bg-black border border-white/10 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all p-1.5 z-50">
+                <div className="absolute top-full right-0 mt-2 w-40 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all p-1.5 z-50">
                   <button 
                     onClick={() => setActiveTab('profile')}
-                    className="w-full text-left px-3 py-1.5 text-[9px] font-bold uppercase tracking-widest text-white hover:bg-white/10 rounded-lg transition-colors flex items-center gap-2"
+                    className="w-full text-left px-3 py-1.5 text-[9px] font-bold uppercase tracking-widest text-zinc-900 dark:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors flex items-center gap-2"
                   >
                     <User size={12} />
                     Settings
                   </button>
                   <button 
                     onClick={() => setActiveTab('transactions')}
-                    className="w-full text-left px-3 py-1.5 text-[9px] font-bold uppercase tracking-widest text-white hover:bg-white/10 rounded-lg transition-colors flex items-center gap-2"
+                    className="w-full text-left px-3 py-1.5 text-[9px] font-bold uppercase tracking-widest text-zinc-900 dark:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors flex items-center gap-2"
                   >
                     <Receipt size={12} />
                     History
                   </button>
                   <button 
                     onClick={logout}
-                    className="w-full text-left px-3 py-1.5 text-[9px] font-bold uppercase tracking-widest text-red-400 hover:bg-red-400/10 rounded-lg transition-colors flex items-center gap-2"
+                    className="w-full text-left px-3 py-1.5 text-[9px] font-bold uppercase tracking-widest text-red-500 hover:bg-red-500/10 rounded-lg transition-colors flex items-center gap-2"
                   >
                     <LogOut size={12} />
                     Logout
@@ -287,13 +287,13 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTa
               </div>
             </div>
           ) : (
-            <button onClick={signInWithGoogle} className="px-4 py-1.5 bg-white text-black rounded-full text-[9px] font-bold uppercase tracking-widest hover:bg-gray-200 transition-colors">
+            <button onClick={signInWithGoogle} className="px-4 py-1.5 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-full text-[9px] font-bold uppercase tracking-widest hover:opacity-90 transition-colors">
               Login
             </button>
           )}
           
           <button 
-            className="p-1.5 text-white hover:bg-white/10 rounded-xl transition-colors"
+            className="p-1.5 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl transition-colors"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
             {isMenuOpen ? <X size={20} /> : <Menu size={20} />}

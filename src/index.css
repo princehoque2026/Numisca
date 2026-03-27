@@ -12,24 +12,28 @@
 
 @layer base {
   body {
-    @apply bg-white text-black font-sans antialiased transition-colors duration-300;
+    @apply bg-zinc-50 text-zinc-900 font-sans antialiased transition-colors duration-300;
   }
   
   .dark body {
-    @apply bg-zinc-950 text-white;
+    @apply bg-zinc-950 text-zinc-100;
   }
   
   h1, h2, h3, h4, h5, h6 {
-    @apply font-display tracking-tight font-bold;
+    @apply font-display tracking-tight font-bold text-zinc-900 dark:text-zinc-50;
+  }
+
+  p {
+    @apply text-zinc-600 dark:text-zinc-400;
   }
 }
 
 .glass {
-  @apply bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border border-black/5 dark:border-white/5 rounded-2xl;
+  @apply bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border border-zinc-200 dark:border-zinc-800 rounded-2xl;
 }
 
 .card-curved {
-  @apply bg-white dark:bg-zinc-900 border border-black/5 dark:border-white/5 rounded-[2rem] shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-2;
+  @apply bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-[2rem] shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-2;
 }
 
 .btn-pill {
